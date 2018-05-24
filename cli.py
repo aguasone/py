@@ -52,7 +52,7 @@ class Recon():
 
 			if True in result:
 				match = [(name) for is_match, name, distances in zip(result, self.known_names, distances) if is_match]
-				print ([(name) for is_match, name, distances in zip(result, self.known_names, distances) if is_match])
+				#print ([(name) for is_match, name, distances in zip(result, self.known_names, distances) if is_match])
 				name = match
 			else:
 				name = ['unknown']

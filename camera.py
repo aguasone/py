@@ -45,19 +45,28 @@ face_recognition = Recon(known_people_folder, tolerance, show_distance)
 print('encoding of the known folder completed in: {:.2f}s'.format(time.time() - start_encoding))
 
 toggleDebug = True
+banner = False
+
 modulo = 2
 color_unknow = (0, 0, 255)
 color_known = (162, 255, 0)
 thickness = 2
-number_fps_second = 1/25
-quality = 10
+number_fps_second = 1/100
+quality = 5
 banner = "hello..."
 color_banner = (0, 0, 255)
+
+#ffmpeg -f avfoundation -framerate 30 -i "0" -f mjpeg -q:v 100 -s 640x480 http://localhost:5000/feed
+#ffmpeg -re -i ../../sabnzbd/complete/shows/The.Big.Bang.Theory.S11E22.mkv -f mjpeg -q:v 20 -s 640x480 http://localhost:5000/feed
+#TODO: add ffmpeg internally
 
 ffmpeg_feed = False
 
 host = os.getenv('HOST', '0.0.0.0')
 port = int(os.getenv('PORT', 5000))
+
+#Check if OpenCV is Optimized:
+print ("CV2 Optimized: ", cv2.useOptimized())
 
 async def testhandle(request):
 	return web.Response(text='Test handle')
@@ -200,7 +209,7 @@ async def read_frame(image, _capture, _frames, _last_image, _count_unknown, _box
 
 					retval, jpg = cv2.imencode('.jpg', saved)
 					base64_bytes = b64encode(jpg)
-					#socketIO.emit('add', json.dumps({"name": 'unknown'+str(_count_unknown)+"_"+ time.strftime("%Y-%m-%d_%H%M%S") +".png", "confidence":text[i], "image": base64_bytes.decode('utf-8') }))#, "image":  cropped.tolist()}))
+					#socketIO.send('add', json.dumps({"name": 'unknown'+str(_count_unknown)+"_"+ time.strftime("%Y-%m-%d_%H%M%S") +".png", "confidence":text[i], "image": base64_bytes.decode('utf-8') }))#, "image":  cropped.tolist()}))
 					array[0] = 'unknown'+str(_count_unknown)
 					result[i] = str(array[0])
 				_count_unknown = _count_unknown + 1
@@ -210,6 +219,11 @@ async def read_frame(image, _capture, _frames, _last_image, _count_unknown, _box
 
 			r = 10
 			d = 10
+
+			_last_image = overlay
+			encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
+			rslt, img_str = cv2.imencode('.jpg', overlay, encode_param)
+			overlay = cv2.imdecode(img_str, 1)
 
 			cv2.line(overlay, (x1 + r, y1), (x1 + r + d, y1), color, thickness)
 			cv2.line(overlay, (x1, y1 + r), (x1, y1 + r + d), color, thickness)
@@ -287,6 +301,11 @@ async def read_frame(image, _capture, _frames, _last_image, _count_unknown, _box
 		#         cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, thickness)
 
 	else:
+		_last_image = overlay
+		encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
+		rslt, img_str = cv2.imencode('.jpg', overlay, encode_param)
+		overlay = cv2.imdecode(img_str, 1)
+
 		if len(_box) > 0:
 			box = _box
 			text = _text
@@ -335,6 +354,9 @@ async def read_frame(image, _capture, _frames, _last_image, _count_unknown, _box
 	c_fps.stop()
 	#print (c_fps.fps())
 
+
+
+
 	#Debug
 	if toggleDebug is True:
 		# grab the frame dimensions
@@ -355,11 +377,10 @@ async def read_frame(image, _capture, _frames, _last_image, _count_unknown, _box
 			cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
 		cv2.putText(overlay, "[DEBUG] background: {:}".format(err), (10, 120),
 			cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
+
+	if banner is True:
 		cv2.putText(overlay, "{}".format(banner), (10, h-10),
 			cv2.FONT_HERSHEY_SIMPLEX, 0.45, color_banner, 1)
-
-
-	_last_image = overlay
 
 	return overlay, _capture, _frames, _last_image, _count_unknown, _box, _text, _result
 
@@ -400,25 +421,24 @@ async def feedHandle(request):
 			while True:
 				time.sleep(number_fps_second)
 				chunk = await stream.read(102400)
-				data += chunk
 				if not chunk:
 					break
+				data += chunk
 				jpg_start = data.find(b'\xff\xd8')
 				jpg_end = data.find(b'\xff\xd9')
 				if jpg_start != -1 and jpg_end != -1:
 					image = data[jpg_start:jpg_end + 2]
-					image = cv2.imdecode(np.frombuffer(image, np.uint8), -1)
+					image = cv2.imdecode(np.frombuffer(image, dtype=np.uint8), cv2.IMREAD_COLOR)
 
 					image, _capture, _frames, _last_image, _count_unknown, _box, _text, _result = await read_frame(image, _capture, _frames, _last_image, _count_unknown, _box, _text, _result)
 
-					encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
-					result, img_str = cv2.imencode('.jpg', image, encode_param)
+					result, img_str = cv2.imencode('.jpg', image)
 
 					try:
 						await ws.send_bytes(img_str.tostring())
 					except Exception:
 						ws = request.app['feed']
-				# data = data[jpg_end + 2:]
+					data = data[jpg_end + 2:]
 		else:
 			while True:
 				time.sleep(number_fps_second)
@@ -426,8 +446,9 @@ async def feedHandle(request):
 				if not image.any():
 					break
 				image, _capture, _frames, _last_image, _count_unknown, _box, _text, _result = await read_frame(image, _capture, _frames, _last_image, _count_unknown, _box, _text, _result)
-				encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
-				result, img_str = cv2.imencode('.jpg', image, encode_param)
+
+				result, img_str = cv2.imencode('.jpg', image)
+
 				try:
 					await ws.send_bytes(img_str.tostring())
 				except Exception:
