@@ -5,6 +5,7 @@ import warnings
 import face_recognition.api as face_recognition
 import time
 
+# TODO Remove deleted encodings
 
 class Recon():
 	def __init__(self, known_people_folder, tolerance=0.8, show_distance=True):
@@ -33,32 +34,45 @@ class Recon():
 
 	async def test_image(self, image_to_check):
 		unknown_image = image_to_check
-		name = ['unknown']
+		name = ['0.unknown']
 		distances = []
 		result = []
 
-		# Scale down image if it's giant so things run a little faster
-		if unknown_image.shape[1] > 1600:
-			scale_factor = 1600.0 / unknown_image.shape[1]
-			with warnings.catch_warnings():
-				warnings.simplefilter("ignore")
-				unknown_image = scipy.misc.imresize(unknown_image, scale_factor)
+		if (self.known_names):
+			# Scale down image if it's giant so things run a little faster
+			if unknown_image.shape[1] > 1600:
+				scale_factor = 1600.0 / unknown_image.shape[1]
+				with warnings.catch_warnings():
+					warnings.simplefilter("ignore")
+					unknown_image = scipy.misc.imresize(unknown_image, scale_factor)
 
-		unknown_encodings = face_recognition.face_encodings(unknown_image)
+			unknown_encodings = face_recognition.face_encodings(unknown_image)
 
-		for unknown_encoding in unknown_encodings:
-			distances = face_recognition.face_distance(self.known_face_encodings, unknown_encoding)
-			result = list(distances <= self.tolerance)
+			for unknown_encoding in unknown_encodings:
+				distances = face_recognition.face_distance(self.known_face_encodings, unknown_encoding)
+				result = list(distances <= self.tolerance)
 
-			if True in result:
-				match = [(name) for is_match, name, distances in zip(result, self.known_names, distances) if is_match]
-				#print ([(name) for is_match, name, distances in zip(result, self.known_names, distances) if is_match])
-				name = match
-			else:
-				name = ['unknown']
+				if True in result:
+					match = [(name) for is_match, name, distances in zip(result, self.known_names, distances) if is_match]
+					#print ([(name) for is_match, name, distances in zip(result, self.known_names, distances) if is_match])
+					name = match
+				else:
+					name = ['0.unknown']
+
+				if len(name) > 1:
+					for i,v in enumerate(name):
+						if not v.startswith( '0.unknown' ):
+							name = []
+							name.append(v)
+							break
+
 		return name, distances
 
-	def unknown_people(self, img, name, date, box):
+	async def unknown_people(self, img, name, photo):
+		if photo is not None:
+			print ('upeople')
+			img = photo
+
 		encodings = face_recognition.face_encodings(img)
 
 		if len(encodings) == 1:
@@ -66,6 +80,14 @@ class Recon():
 			self.known_face_encodings.append(encodings[0])
 
 		return len(encodings)
+
+	async def delete_unknown_names(self, name):
+		for i,v in enumerate(self.known_names):
+			if v == name:
+				try:
+					del self.known_names[i]
+				except Exception as e:
+					print ("Already Deleted: ", e)
 
 	def image_files_in_folder(self):
 		return [os.path.join(self.known_people_folder, f) for f in os.listdir(self.known_people_folder) if re.match(r'.*\.(jpg|jpeg|png)', f, flags=re.I)]
