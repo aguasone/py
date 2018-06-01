@@ -1,0 +1,8 @@
+asyncio
+aiohttp
+pickle
+cv2
+numpy
+imutils
+skimage
+

@@ -3,6 +3,12 @@
 	[
 		{
 			"path": "."
+		},
+		{
+			"path": "/Users/admin/Downloads/dev/Smart-Bell-master/python"
+		},
+		{
+			"path": "/Users/admin/Downloads/dev/Smart-Bell-master/frontend"
 		}
 	]
 }
