@@ -1,12 +1,13 @@
 version: "3"
 services:
   control:
-    image: nodered/node-red-docker
+    image: ex34-nodered
     ports:
       - "1880:1880"
     networks:
       backend:
         ipv4_address: 172.10.0.200
+
     extra_hosts:
       - "db:172.10.0.201"
   db:
@@ -19,6 +20,7 @@ services:
     networks:
       backend:
         ipv4_address: 172.10.0.201
+
     extra_hosts:
       - "control:172.10.0.200"
   api:
