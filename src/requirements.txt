@@ -1,8 +1,9 @@
 asyncio
 aiohttp
-pickle
-cv2
+opencv-python
+dlib
 numpy
 imutils
-skimage
-
+scikit-image
+face-recognition
+scipy

@@ -4,6 +4,10 @@
 		"selected_items":
 		[
 			[
+				"loge",
+				"logger.info(\"loading"
+			],
+			[
 				"vide",
 				"video_size"
 			],
@@ -40,62 +44,51 @@
 	"buffers":
 	[
 		{
-			"file": "camera.py",
+			"file": "src/camera.py",
 			"settings":
 			{
-				"buffer_size": 22890,
+				"buffer_size": 27105,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"contents": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Socket.IO Chat Example</title>\n  <style>\n  /* Fix user-agent */\n\n* {\n  box-sizing: border-box;\n}\n\nhtml {\n  font-weight: 300;\n  -webkit-font-smoothing: antialiased;\n}\n\nhtml, input {\n  font-family:\n    \"HelveticaNeue-Light\",\n    \"Helvetica Neue Light\",\n    \"Helvetica Neue\",\n    Helvetica,\n    Arial,\n    \"Lucida Grande\",\n    sans-serif;\n}\n\nhtml, body {\n  height: 100%;\n  margin: 0;\n  padding: 0;\n}\n\nul {\n  list-style: none;\n  word-wrap: break-word;\n}\n\n/* Pages */\n\n.pages {\n  height: 100%;\n  margin: 0;\n  padding: 0;\n  width: 100%;\n}\n\n.page {\n  height: 100%;\n  position: absolute;\n  width: 100%;\n}\n\n/* Login Page */\n\n.login.page {\n  background-color: #000;\n}\n\n.login.page .form {\n  height: 100px;\n  margin-top: -100px;\n  position: absolute;\n\n  text-align: center;\n  top: 50%;\n  width: 100%;\n}\n\n.login.page .form .usernameInput {\n  background-color: transparent;\n  border: none;\n  border-bottom: 2px solid #fff;\n  outline: none;\n  padding-bottom: 15px;\n  text-align: center;\n  width: 400px;\n}\n\n.login.page .title {\n  font-size: 200%;\n}\n\n.login.page .usernameInput {\n  font-size: 200%;\n  letter-spacing: 3px;\n}\n\n.login.page .title, .login.page .usernameInput {\n  color: #fff;\n  font-weight: 100;\n}\n\n/* Chat page */\n\n.chat.page {\n  display: none;\n}\n\n/* Font */\n\n.messages {\n  font-size: 150%;\n}\n\n.inputMessage {\n  font-size: 100%;\n}\n\n.log {\n  color: gray;\n  font-size: 70%;\n  margin: 5px;\n  text-align: center;\n}\n\n/* Messages */\n\n.chatArea {\n  height: 100%;\n  padding-bottom: 60px;\n}\n\n.messages {\n  height: 100%;\n  margin: 0;\n  overflow-y: scroll;\n  padding: 10px 20px 10px 20px;\n}\n\n.message.typing .messageBody {\n  color: gray;\n}\n\n.username {\n  font-weight: 700;\n  overflow: hidden;\n  padding-right: 15px;\n  text-align: right;\n}\n\n/* Input */\n\n.inputMessage {\n  border: 10px solid #000;\n  bottom: 0;\n  height: 60px;\n  left: 0;\n  outline: none;\n  padding-left: 10px;\n  position: absolute;\n  right: 0;\n  width: 100%;\n}  </style>\n</head>\n<body>\n  <ul class=\"pages\">\n    <li class=\"chat page\">\n      <div class=\"chatArea\">\n        <ul class=\"messages\"></ul>\n      </div>\n      <input class=\"inputMessage\" placeholder=\"Type here...\"/>\n    </li>\n    <li class=\"login page\">\n      <div class=\"form\">\n        <h3 class=\"title\">What's your nickname?</h3>\n        <input class=\"usernameInput\" type=\"text\" maxlength=\"14\" />\n      </div>\n    </li>\n  </ul>\n\n  <script src=\"https://code.jquery.com/jquery-1.10.2.min.js\"></script>\n  <script src=\"/socket.io/socket.io.js\"></script>\n  <script >$(function() {\n  var FADE_TIME = 150; // ms\n  var TYPING_TIMER_LENGTH = 400; // ms\n  var COLORS = [\n    '#e21400', '#91580f', '#f8a700', '#f78b00',\n    '#58dc00', '#287b00', '#a8f07a', '#4ae8c4',\n    '#3b88eb', '#3824aa', '#a700ff', '#d300e7'\n  ];\n\n  // Initialize variables\n  var $window = $(window);\n  var $usernameInput = $('.usernameInput'); // Input for username\n  var $messages = $('.messages'); // Messages area\n  var $inputMessage = $('.inputMessage'); // Input message input box\n\n  var $loginPage = $('.login.page'); // The login page\n  var $chatPage = $('.chat.page'); // The chatroom page\n\n  // Prompt for setting a username\n  var username;\n  var connected = false;\n  var typing = false;\n  var lastTypingTime;\n  var $currentInput = $usernameInput.focus();\n\n  var socket = io();\n\n  function addParticipantsMessage (data) {\n    var message = '';\n    if (data.numUsers === 1) {\n      message += \"there's 1 participant\";\n    } else {\n      message += \"there are \" + data.numUsers + \" participants\";\n    }\n    log(message);\n  }\n\n  // Sets the client's username\n  function setUsername () {\n    username = cleanInput($usernameInput.val().trim());\n\n    // If the username is valid\n    if (username) {\n      $loginPage.fadeOut();\n      $chatPage.show();\n      $loginPage.off('click');\n      $currentInput = $inputMessage.focus();\n\n      // Tell the server your username\n      socket.emit('add user', username);\n    }\n  }\n\n  // Sends a chat message\n  function sendMessage () {\n    var message = $inputMessage.val();\n    // Prevent markup from being injected into the message\n    message = cleanInput(message);\n    // if there is a non-empty message and a socket connection\n    if (message && connected) {\n      $inputMessage.val('');\n      addChatMessage({\n        username: username,\n        message: message\n      });\n      // tell server to execute 'new message' and send along one parameter\n      socket.emit('new message', message);\n    }\n  }\n\n  // Log a message\n  function log (message, options) {\n    var $el = $('<li>').addClass('log').text(message);\n    addMessageElement($el, options);\n  }\n\n  // Adds the visual chat message to the message list\n  function addChatMessage (data, options) {\n    // Don't fade the message in if there is an 'X was typing'\n    var $typingMessages = getTypingMessages(data);\n    options = options || {};\n    if ($typingMessages.length !== 0) {\n      options.fade = false;\n      $typingMessages.remove();\n    }\n\n    var $usernameDiv = $('<span class=\"username\"/>')\n      .text(data.username)\n      .css('color', getUsernameColor(data.username));\n    var $messageBodyDiv = $('<span class=\"messageBody\">')\n      .text(data.message);\n\n    var typingClass = data.typing ? 'typing' : '';\n    var $messageDiv = $('<li class=\"message\"/>')\n      .data('username', data.username)\n      .addClass(typingClass)\n      .append($usernameDiv, $messageBodyDiv);\n\n    addMessageElement($messageDiv, options);\n  }\n\n  // Adds the visual chat typing message\n  function addChatTyping (data) {\n    data.typing = true;\n    data.message = 'is typing';\n    addChatMessage(data);\n  }\n\n  // Removes the visual chat typing message\n  function removeChatTyping (data) {\n    getTypingMessages(data).fadeOut(function () {\n      $(this).remove();\n    });\n  }\n\n  // Adds a message element to the messages and scrolls to the bottom\n  // el - The element to add as a message\n  // options.fade - If the element should fade-in (default = true)\n  // options.prepend - If the element should prepend\n  //   all other messages (default = false)\n  function addMessageElement (el, options) {\n    var $el = $(el);\n\n    // Setup default options\n    if (!options) {\n      options = {};\n    }\n    if (typeof options.fade === 'undefined') {\n      options.fade = true;\n    }\n    if (typeof options.prepend === 'undefined') {\n      options.prepend = false;\n    }\n\n    // Apply options\n    if (options.fade) {\n      $el.hide().fadeIn(FADE_TIME);\n    }\n    if (options.prepend) {\n      $messages.prepend($el);\n    } else {\n      $messages.append($el);\n    }\n    $messages[0].scrollTop = $messages[0].scrollHeight;\n  }\n\n  // Prevents input from having injected markup\n  function cleanInput (input) {\n    return $('<div/>').text(input).text();\n  }\n\n  // Updates the typing event\n  function updateTyping () {\n    if (connected) {\n      if (!typing) {\n        typing = true;\n        socket.emit('typing');\n      }\n      lastTypingTime = (new Date()).getTime();\n\n      setTimeout(function () {\n        var typingTimer = (new Date()).getTime();\n        var timeDiff = typingTimer - lastTypingTime;\n        if (timeDiff >= TYPING_TIMER_LENGTH && typing) {\n          socket.emit('stop typing');\n          typing = false;\n        }\n      }, TYPING_TIMER_LENGTH);\n    }\n  }\n\n  // Gets the 'X is typing' messages of a user\n  function getTypingMessages (data) {\n    return $('.typing.message').filter(function (i) {\n      return $(this).data('username') === data.username;\n    });\n  }\n\n  // Gets the color of a username through our hash function\n  function getUsernameColor (username) {\n    // Compute hash code\n    var hash = 7;\n    for (var i = 0; i < username.length; i++) {\n       hash = username.charCodeAt(i) + (hash << 5) - hash;\n    }\n    // Calculate color\n    var index = Math.abs(hash % COLORS.length);\n    return COLORS[index];\n  }\n\n  // Keyboard events\n\n  $window.keydown(function (event) {\n    // Auto-focus the current input when a key is typed\n    if (!(event.ctrlKey || event.metaKey || event.altKey)) {\n      $currentInput.focus();\n    }\n    // When the client hits ENTER on their keyboard\n    if (event.which === 13) {\n      if (username) {\n        sendMessage();\n        socket.emit('stop typing');\n        typing = false;\n      } else {\n        setUsername();\n      }\n    }\n  });\n\n  $inputMessage.on('input', function() {\n    updateTyping();\n  });\n\n  // Click events\n\n  // Focus input when clicking anywhere on login page\n  $loginPage.click(function () {\n    $currentInput.focus();\n  });\n\n  // Focus input when clicking on the message input's border\n  $inputMessage.click(function () {\n    $inputMessage.focus();\n  });\n\n  // Socket events\n\n  // Whenever the server emits 'login', log the login message\n  socket.on('login', function (data) {\n    connected = true;\n    // Display the welcome message\n    var message = \"Welcome to Socket.IO Chat � \";\n    log(message, {\n      prepend: true\n    });\n    addParticipantsMessage(data);\n  });\n\n  // Whenever the server emits 'new message', update the chat body\n  socket.on('new message', function (data) {\n    addChatMessage(data);\n  });\n\n  // Whenever the server emits 'user joined', log it in the chat body\n  socket.on('user joined', function (data) {\n    log(data.username + ' joined');\n    addParticipantsMessage(data);\n  });\n\n  // Whenever the server emits 'user left', log it in the chat body\n  socket.on('user left', function (data) {\n    log(data.username + ' left');\n    addParticipantsMessage(data);\n    removeChatTyping(data);\n  });\n\n  // Whenever the server emits 'typing', show the typing message\n  socket.on('typing', function (data) {\n    addChatTyping(data);\n  });\n\n  // Whenever the server emits 'stop typing', kill the typing message\n  socket.on('stop typing', function (data) {\n    removeChatTyping(data);\n  });\n\n  socket.on('disconnect', function () {\n    log('you have been disconnected');\n  });\n\n  socket.on('reconnect', function () {\n    log('you have been reconnected');\n    if (username) {\n      socket.emit('add user', username);\n    }\n  });\n\n  socket.on('reconnect_error', function () {\n    log('attempt to reconnect has failed');\n  });\n\n});\n</script>\n</body>\n</html>\n",
+			"file": "Dockerfile",
 			"settings":
 			{
-				"buffer_size": 10178,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/Users/admin/Desktop/face/work_crop_align_resize/test.py",
-			"settings":
-			{
-				"buffer_size": 12889,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "cli.py",
-			"settings":
-			{
-				"buffer_size": 2872,
+				"buffer_size": 688,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "/Users/admin/Downloads/dev/Smart-Bell-master/python/videostream.py",
+			"file": "src/cli.py",
 			"settings":
 			{
-				"buffer_size": 2410,
+				"buffer_size": 2968,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "/Users/admin/Downloads/dev/Smart-Bell-master/python/usbcamera.py",
+			"contents": "import asyncio\nimport os\nimport aiohttp\nimport json\nimport subprocess\nimport inspect\nimport ssl\nimport logging\nimport datetime\nimport pathlib\nimport pickle\nimport uuid\n\nfrom aiohttp import web\n\nimport cv2\nimport time\nimport numpy as np\nimport imutils\nfrom imutils.video import WebcamVideoStream\nfrom imutils.face_utils import FaceAligner\nfrom imutils.face_utils import rect_to_bb\nfrom imutils.video import FPS\nfrom cli import Recon\nimport json\nimport base64\nfrom base64 import b64encode\nfrom skimage.measure import compare_ssim\n\n#LOGS\nformatter = logging.Formatter('[%(asctime)s] p%(process)s {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s','%m-%d %H:%M:%S')\nlogging.basicConfig(format=\"[%(asctime)s] p%(process)s {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s\")\n\n# create a file handler\nhandler = logging.FileHandler('camera.log')\nhandler.setFormatter(formatter)\nhandler.setLevel(logging.INFO)\n\nlogger = logging.getLogger('async')\nlogger.setLevel(logging.INFO)\n\ngimage = None\n\n\nfc = {}\nfeed = {}\n_capture = {}\ntimer = 60\nshutdown = False\n\nhost = os.getenv('HOST', '0.0.0.0')\nport = int(os.getenv('PORT', 5000))\n\n\nasync def init(app):\n\n  app['uuid'] = uuid.uuid4()\n\n  #Face Recognition parameters\n  fc['known_people_folder'] = 'known'\n  fc['tolerance'] = 0.68\n  fc['show_distance'] = True\n  fc['prototxt'] = \"deploy.prototxt.txt\"\n  fc['model'] = \"res10_300x300_ssd_iter_140000.caffemodel\"\n  fc['shape_predictor'] = \"shape_predictor_68_face_landmarks.dat\"\n  fc['confidence'] = 0.8\n\n\n  # print(\"[INFO] loading shape-predictor...\")\n  # detector = dlib.get_frontal_face_detector()\n  # predictor = dlib.shape_predictor(args[\"shape_predictor\"])\n  # fa = FaceAligner(predictor, desiredFaceWidth=256)\n\n  feed['toggleDebug'] = True\n  feed['banner'] = False\n\n  feed['modulo'] = 2\n  feed['color_unknow'] = (0, 0, 255)\n  feed['color_know'] = (162, 255, 0)\n  feed['thickness'] = 2\n  feed['number_fps_second'] = 1/25\n  feed['quality'] = 5\n  feed['banner'] = \"hello...\"\n  feed['color_banner'] = (0, 0, 255)\n\n  feed['video_size'] = 600\n\n  #ffmpeg -f avfoundation -framerate 30 -i \"0\" -f mjpeg -q:v 100 -s 640x480 http://localhost:5000/feed\n  #ffmpeg -re -i ../../sabnzbd/complete/shows/The.Big.Bang.Theory.S11E22.mkv -f mjpeg -q:v 20 -s 640x480 http://localhost:5000/feed\n  #ffmpeg -f avfoundation -framerate 30 -i \"0\" -f mpegts udp://192.168.1.26:9999\n  #TODO: add ffmpeg internally\n\n  feed['ffmpeg_feed'] = False\n\n  # load our serialized model from disk\n  logger.info(\"[INFO] loading model...\")\n  fc['net'] = cv2.dnn.readNetFromCaffe(fc['prototxt'], fc['model'])\n\n  start_encoding = time.time()\n  fc['face_recognition'] = Recon(fc['known_people_folder'], fc['tolerance'], fc['show_distance'])\n  logger.info('encoding of the known folder completed in: {:.2f}s'.format(time.time() - start_encoding))\n\n  #Check if OpenCV is Optimized:\n  logger.info (\"CV2 Optimized: {}\".format(cv2.useOptimized()))\n\n  # #reload object from file\n  # file2 = open(r'C:\\d.pkl', 'rb')\n  # new_d = pickle.load(file2)\n  # file2.close()\n\nasync def stopHandle(request):\n  shutdown = True\n  return web.Response(text='Shutting down...')\n\nasync def read_frame(_frames, _last_image, _count_unknown, _box, _text, _result, app):\n  err = 0\n  check = 0\n  squares = 0\n  speed = 0\n  score = 0\n  _frames = _frames + 1\n  global gimage\n  global img_str\n\n  c_fps = FPS().start()\n  image = feed['_camera'].read()\n  overlay = imutils.resize(image, width=feed['video_size'])\n\n  overlay = cv2.flip( overlay, 1 )\n\n  # if len(_last_image) > 0:\n  #   err = np.sum((overlay.astype(\"float\") - _last_image.astype(\"float\")) ** 2)\n  #   err /= float(overlay.shape[0] * overlay.shape[1])\n  #   #print (err)\n\n  if (_frames % feed['modulo'] == 0):\n\n    # Make copies of the frame for transparency processing\n    #overlay = frame.copy()\n    #output = overlay.copy()\n\n    #set transparency value\n    #alpha  = 0.5\n\n    # make semi-transparent bounding box\n    #cv2.addWeighted(overlay, alpha, output, 1 - alpha, 0, output)\n\n    # grab the frame dimensions and convert it to a blob\n    (h, w) = overlay.shape[:2]\n\n    blob = cv2.dnn.blobFromImage(cv2.resize(overlay, (300, 300)), 1.0,\n      (300, 300), (104.0, 177.0, 123.0))\n\n    # pass the blob through the network and obtain the detections and\n    # predictions\n    fc['net'].setInput(blob)\n    detections = fc['net'].forward()\n\n\n    box = {}\n    text = {}\n    result = {}\n    # loop over the detections\n    for i in range(0, detections.shape[2]):\n\n\n      # extract the confidence (i.e., probability) associated with the\n      # prediction\n      _confidence = detections[0, 0, i, 2]\n\n      # filter out weak detections by ensuring the `confidence` is\n      # greater than the minimum confidence\n      if _confidence < fc['confidence']:\n        continue\n\n      squares = squares + 1\n      # compute the (x, y)-coordinates of the bounding box for the\n      # object\n      box[i] = detections[0, 0, i, 3:7] * np.array([w, h, w, h])\n      (startX, startY, endX, endY) = box[i].astype(\"int\")\n      (x1, y1, x2, y2) = box[i].astype(\"int\")\n\n      # draw the bounding box of the face along with the associated\n      # probability\n      txt = \"{:.2f}%\".format(_confidence * 100)\n      text[i] = txt\n      y = startY - 10 if startY - 10 > 10 else startY + 10\n\n      #gray = cv2.cvtColor(overlay, cv2.COLOR_BGR2GRAY)\n      cropped = overlay[startY:endY, startX:endX]\n\n      start_encoding = time.time()\n      found = False\n      array = []\n      distances = []\n      array, distances = await fc['face_recognition'].test_image(cropped)\n      logger.debug(\"array: {}\".format(array))\n      result[i] = 'unknown'\n      if (array != ['0.unknown']) and (array != []):\n        # If Customer Known\n        try:\n          _capture[array[0]]\n        except (KeyError, IndexError) as e:\n          if startY-50 < 0:\n              x1 = 0\n          else:\n              x1 = startY-50\n          if endY+50 < 0:\n              y1 = 0\n          else:\n              y1 = endY+50\n          if startX-50 < 0:\n              x2 = 0\n          else:\n              x2 = startX-50\n          if endX+50 < 0:\n              y2 = 0\n          else:\n              y2 = endX+50\n          saved = overlay[x1:y1, x2:y2]\n\n          _capture[array[0]] = [cropped, box[i], text[i]]\n\n          retval, jpg = cv2.imencode('.jpg', saved)\n          base64_bytes = b64encode(jpg)\n          control = None\n          while control == None:\n            try:\n              control = app['control']\n              logger.info('add known: {}'.format(str.split(array[0], '.')[0]))\n              await control.send_str(json.dumps({\"action\":\"add_known\", \"date\": time.strftime(\"%Y%m%d%H%M%S\"), \"name\": str.split(array[0], '.')[0], \"confidence\":text[i], \"image\": base64_bytes.decode('utf-8'), \"uuid\":str(app['uuid']) }))#, \"image\":  cropped.tolist()}))\n            except Exception as e:\n              logger.info(\"ws error: \", e)\n        if array[0].startswith( '0.unknown' ):\n          color = feed['color_unknow']\n        else:\n          color = feed['color_know']\n        result[i] = str.split(array[0], '.')[1]\n      else:\n        #If Customer unknown\n        color = feed['color_unknow']\n        add = await fc['face_recognition'].unknown_people(cropped, '0.unknown'+str(_count_unknown), None)\n        if add == 1:\n          if startY-50 < 0:\n              x1 = 0\n          else:\n              x1 = startY-50\n          if endY+50 < 0:\n              y1 = 0\n          else:\n              y1 = endY+50\n          if startX-50 < 0:\n              x2 = 0\n          else:\n              x2 = startX-50\n          if endX+50 < 0:\n              y2 = 0\n          else:\n              y2 = endX+50\n          saved = overlay[x1:y1, x2:y2]\n          _capture['0.unknown'+str(_count_unknown)] = [cropped, box[i], text[i]]\n          retval, jpg = cv2.imencode('.jpg', saved)\n          base64_bytes = b64encode(jpg)\n          control = None\n          while control == None:\n            try:\n              control = app['control']\n              logger.info('add unknown: {}'.format('unknown'+str(_count_unknown)))\n              await control.send_str(json.dumps({\"action\":\"add_unknown\", \"date\": time.strftime(\"%Y%m%d%H%M%S\"), \"name\": 'unknown'+str(_count_unknown), \"confidence\":text[i], \"image\": base64_bytes.decode('utf-8'), \"uuid\":str(app['uuid']) }))#, \"image\":  cropped.tolist()}))\n            except Exception as e:\n              logger.info(\"error: \", e)\n\n          result[i] = 'unknown'+str(_count_unknown)\n        _count_unknown = _count_unknown + 1\n\n      speed = time.time() - start_encoding\n\n      r = 10\n      d = 10\n\n      score = 1\n      _last_image = overlay\n      gimage = overlay.copy()\n      encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), feed['quality']]\n      rslt, img_str = cv2.imencode('.jpg', overlay, encode_param)\n      overlay = cv2.imdecode(img_str, 1)\n\n      cv2.line(overlay, (x1 + r, y1), (x1 + r + d, y1), color, feed['thickness'])\n      cv2.line(overlay, (x1, y1 + r), (x1, y1 + r + d), color, feed['thickness'])\n      cv2.ellipse(overlay, (x1 + r, y1 + r), (r, r), 180, 0, 90, color, feed['thickness'])\n\n      # Top right drawing\n      cv2.line(overlay, (x2 - r, y1), (x2 - r - d, y1), color, feed['thickness'])\n      cv2.line(overlay, (x2, y1 + r), (x2, y1 + r + d), color, feed['thickness'])\n      cv2.ellipse(overlay, (x2 - r, y1 + r), (r, r), 270, 0, 90, color, feed['thickness'])\n\n      # Bottom left drawing\n      cv2.line(overlay, (x1 + r, y2), (x1 + r + d, y2), color, feed['thickness'])\n      cv2.line(overlay, (x1, y2 - r), (x1, y2 - r - d), color, feed['thickness'])\n      cv2.ellipse(overlay, (x1 + r, y2 - r), (r, r), 90, 0, 90, color, feed['thickness'])\n\n      # Bottom right drawing\n      cv2.line(overlay, (x2 - r, y2), (x2 - r - d, y2), color, feed['thickness'])\n      cv2.line(overlay, (x2, y2 - r), (x2, y2 - r - d), color, feed['thickness'])\n      cv2.ellipse(overlay, (x2 - r, y2 - r), (r, r), 0, 0, 90, color, feed['thickness'])\n\n      cv2.putText(overlay, text[i], (startX, y),\n        cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, feed['thickness'])\n\n      cv2.putText(overlay, result[i], (x1 + r, endY),\n        cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, feed['thickness'])\n\n      cv2.line(gimage, (x1 + r, y1), (x1 + r + d, y1), color, feed['thickness'])\n      cv2.line(gimage, (x1, y1 + r), (x1, y1 + r + d), color, feed['thickness'])\n      cv2.ellipse(gimage, (x1 + r, y1 + r), (r, r), 180, 0, 90, color, feed['thickness'])\n\n      # Top right drawing\n      cv2.line(gimage, (x2 - r, y1), (x2 - r - d, y1), color, feed['thickness'])\n      cv2.line(gimage, (x2, y1 + r), (x2, y1 + r + d), color, feed['thickness'])\n      cv2.ellipse(gimage, (x2 - r, y1 + r), (r, r), 270, 0, 90, color, feed['thickness'])\n\n      # Bottom left drawing\n      cv2.line(gimage, (x1 + r, y2), (x1 + r + d, y2), color, feed['thickness'])\n      cv2.line(gimage, (x1, y2 - r), (x1, y2 - r - d), color, feed['thickness'])\n      cv2.ellipse(gimage, (x1 + r, y2 - r), (r, r), 90, 0, 90, color, feed['thickness'])\n\n      # Bottom right drawing\n      cv2.line(gimage, (x2 - r, y2), (x2 - r - d, y2), color, feed['thickness'])\n      cv2.line(gimage, (x2, y2 - r), (x2, y2 - r - d), color, feed['thickness'])\n      cv2.ellipse(gimage, (x2 - r, y2 - r), (r, r), 0, 0, 90, color, feed['thickness'])\n\n      cv2.putText(gimage, text[i], (startX, y),\n        cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, feed['thickness'])\n\n      cv2.putText(gimage, result[i], (x1 + r, endY),\n        cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, feed['thickness'])\n\n    _box = box\n    _text = text\n    _result = result\n    _last_image = overlay\n    if score != 1:\n      gimage = overlay.copy()\n      encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), feed['quality']]\n      rslt, img_str = cv2.imencode('.jpg', overlay, encode_param)\n      overlay = cv2.imdecode(img_str, 1)\n\n  else:\n    _last_image = overlay\n    gimage = overlay.copy()\n    encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), feed['quality']]\n    rslt, img_str = cv2.imencode('.jpg', overlay, encode_param)\n    overlay = cv2.imdecode(img_str, 1)\n\n    if len(_box) > 0:\n      box = _box\n      text = _text\n      result = _result\n\n      for i in range(0, len(box)):\n        (startX, startY, endX, endY) = box[i].astype(\"int\")\n        (x1, y1, x2, y2) = box[i].astype(\"int\")\n\n        if result[i].startswith( 'unknown' ):\n          color = feed['color_unknow']\n        else:\n          color = feed['color_know']\n\n        r = 10\n        d = 10\n\n        y = startY - 10 if startY - 10 > 10 else startY + 10\n\n        cv2.line(overlay, (x1 + r, y1), (x1 + r + d, y1), color, feed['thickness'])\n        cv2.line(overlay, (x1, y1 + r), (x1, y1 + r + d), color, feed['thickness'])\n        cv2.ellipse(overlay, (x1 + r, y1 + r), (r, r), 180, 0, 90, color, feed['thickness'])\n\n        # Top right drawing\n        cv2.line(overlay, (x2 - r, y1), (x2 - r - d, y1), color, feed['thickness'])\n        cv2.line(overlay, (x2, y1 + r), (x2, y1 + r + d), color, feed['thickness'])\n        cv2.ellipse(overlay, (x2 - r, y1 + r), (r, r), 270, 0, 90, color, feed['thickness'])\n\n        # Bottom left drawing\n        cv2.line(overlay, (x1 + r, y2), (x1 + r + d, y2), color, feed['thickness'])\n        cv2.line(overlay, (x1, y2 - r), (x1, y2 - r - d), color, feed['thickness'])\n        cv2.ellipse(overlay, (x1 + r, y2 - r), (r, r), 90, 0, 90, color, feed['thickness'])\n\n        # Bottom right drawing\n        cv2.line(overlay, (x2 - r, y2), (x2 - r - d, y2), color, feed['thickness'])\n        cv2.line(overlay, (x2, y2 - r), (x2, y2 - r - d), color, feed['thickness'])\n        cv2.ellipse(overlay, (x2 - r, y2 - r), (r, r), 0, 0, 90, color, feed['thickness'])\n\n        cv2.putText(overlay, text[i], (startX, y),\n          cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, feed['thickness'])\n\n        cv2.putText(overlay, result[i], (x1 + r, endY),\n          cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, feed['thickness'])\n\n        cv2.line(gimage, (x1 + r, y1), (x1 + r + d, y1), color, feed['thickness'])\n        cv2.line(gimage, (x1, y1 + r), (x1, y1 + r + d), color, feed['thickness'])\n        cv2.ellipse(gimage, (x1 + r, y1 + r), (r, r), 180, 0, 90, color, feed['thickness'])\n\n        # Top right drawing\n        cv2.line(gimage, (x2 - r, y1), (x2 - r - d, y1), color, feed['thickness'])\n        cv2.line(gimage, (x2, y1 + r), (x2, y1 + r + d), color, feed['thickness'])\n        cv2.ellipse(gimage, (x2 - r, y1 + r), (r, r), 270, 0, 90, color, feed['thickness'])\n\n        # Bottom left drawing\n        cv2.line(gimage, (x1 + r, y2), (x1 + r + d, y2), color, feed['thickness'])\n        cv2.line(gimage, (x1, y2 - r), (x1, y2 - r - d), color, feed['thickness'])\n        cv2.ellipse(gimage, (x1 + r, y2 - r), (r, r), 90, 0, 90, color, feed['thickness'])\n\n        # Bottom right drawing\n        cv2.line(gimage, (x2 - r, y2), (x2 - r - d, y2), color, feed['thickness'])\n        cv2.line(gimage, (x2, y2 - r), (x2, y2 - r - d), color, feed['thickness'])\n        cv2.ellipse(gimage, (x2 - r, y2 - r), (r, r), 0, 0, 90, color, feed['thickness'])\n\n        cv2.putText(gimage, text[i], (startX, y),\n          cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, feed['thickness'])\n\n        cv2.putText(gimage, result[i], (x1 + r, endY),\n          cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, feed['thickness'])\n\n  c_fps.update()\n  c_fps.stop()\n  #print (c_fps.fps())\n\n  #Debug\n  if feed['toggleDebug'] is True:\n    # grab the frame dimensions\n    (h, w) = overlay.shape[:2]\n    cv2.putText(overlay, \"[DEBUG] elasped time: {:.2f}s\".format(c_fps.elapsed()), (10, 15),\n      cv2.FONT_HERSHEY_SIMPLEX, 0.45, feed['color_know'], 1)\n    cv2.putText(overlay, \"[DEBUG] approx. FPS: {:.2f}\".format(c_fps.fps()), (10, 30),\n      cv2.FONT_HERSHEY_SIMPLEX, 0.45, feed['color_know'], 1)\n    cv2.putText(overlay, \"[DEBUG] square detected: {}\".format(len(_box)), (10, 45),\n      cv2.FONT_HERSHEY_SIMPLEX, 0.45, feed['color_know'], 1)\n    cv2.putText(overlay, \"[DEBUG] unknown detected: {}\".format(_count_unknown), (10, 60),\n      cv2.FONT_HERSHEY_SIMPLEX, 0.45, feed['color_know'], 1)\n    cv2.putText(overlay, \"[DEBUG] total faces: {}\".format(len(_capture)), (10, 75),\n      cv2.FONT_HERSHEY_SIMPLEX, 0.45, feed['color_know'], 1)\n    cv2.putText(overlay, \"[DEBUG] recon: {:.2f}s\".format(speed), (10, 90),\n      cv2.FONT_HERSHEY_SIMPLEX, 0.45, feed['color_know'], 1)\n    cv2.putText(overlay, \"[DEBUG] background: {}\".format(datetime.datetime.now().strftime(\"%H:%M:%S\")), (10, 120),\n      cv2.FONT_HERSHEY_SIMPLEX, 0.45, feed['color_know'], 1)\n\n    (h, w) = gimage.shape[:2]\n    cv2.putText(gimage, \"[DEBUG] elasped time: {:.2f}s\".format(c_fps.elapsed()), (10, 15),\n      cv2.FONT_HERSHEY_SIMPLEX, 0.45, feed['color_know'], 1)\n    cv2.putText(gimage, \"[DEBUG] approx. FPS: {:.2f}\".format(c_fps.fps()), (10, 30),\n      cv2.FONT_HERSHEY_SIMPLEX, 0.45, feed['color_know'], 1)\n    cv2.putText(gimage, \"[DEBUG] square detected: {}\".format(len(_box)), (10, 45),\n      cv2.FONT_HERSHEY_SIMPLEX, 0.45, feed['color_know'], 1)\n    cv2.putText(gimage, \"[DEBUG] unknown detected: {}\".format(_count_unknown), (10, 60),\n      cv2.FONT_HERSHEY_SIMPLEX, 0.45, feed['color_know'], 1)\n    cv2.putText(gimage, \"[DEBUG] total faces: {}\".format(len(_capture)), (10, 75),\n      cv2.FONT_HERSHEY_SIMPLEX, 0.45, feed['color_know'], 1)\n    cv2.putText(gimage, \"[DEBUG] recon: {:.2f}s\".format(speed), (10, 90),\n      cv2.FONT_HERSHEY_SIMPLEX, 0.45, feed['color_know'], 1)\n    cv2.putText(gimage, \"[DEBUG] background: {}\".format(datetime.datetime.now().strftime(\"%H:%M:%S\")), (10, 120),\n      cv2.FONT_HERSHEY_SIMPLEX, 0.45, feed['color_know'], 1)\n\n  if feed['banner'] is True:\n    cv2.putText(overlay, \"{}\".format(feed['banner']), (10, h-10),\n      cv2.FONT_HERSHEY_SIMPLEX, 0.45, feed['color_banner'], 1)\n    cv2.putText(gimage, \"{}\".format(feed['banner']), (10, h-10),\n      cv2.FONT_HERSHEY_SIMPLEX, 0.45, feed['color_banner'], 1)\n\n\n  result, img_str = cv2.imencode('.jpg', overlay)\n\n  return img_str, _frames, _last_image, _count_unknown, _box, _text, _result\n\nasync def process_video(app):\n  try:\n    #_camera = WebcamVideoStream(src=\"udp://192.168.1.26:9999\").start()\n    feed['_camera'] = WebcamVideoStream(src=feed['feedURL']).start()\n    start_timer = time.time()\n    _last_image = np.array([])\n    _frames = 0\n    _count_unknown = 0\n    _added = 0\n    _mean = .92\n    _meanBackground = 1\n    _level = 1\n    _text = {}\n    _result = \"\"\n    count_unknown = 0\n    frames = 0\n    control = None\n    while control == None:\n      try:\n        control = app['control']\n      except Exception as e:\n        logger.info (\"error: {}\".format(e))\n        await asyncio.sleep(1)\n\n    _box = np.array([])\n\n    while True:\n      end_timer = time.time()\n      if (end_timer - start_timer) > timer:\n        if _capture:\n          el = min(_capture)\n          error = _capture.pop(el, None)\n          if error is not None:\n            if el.startswith( '0.unknown' ):\n              await fc['face_recognition'].delete_unknown_names(el)\n        start_timer = time.time()\n      if shutdown:\n        break\n\n      image, _frames, _last_image, _count_unknown, _box, _text, _result = await read_frame(_frames, _last_image, _count_unknown, _box, _text, _result, app)\n\n      await asyncio.sleep(feed['number_fps_second'])\n\n  except asyncio.CancelledError:\n    logger.info('stop')\n    feed['_camera'].stop()\n  except Exception as e:\n    logger.info(\"Error: \", e)\n\nasync def mjpeg_video(app):\n  logger.info(\"mjpeg\")\n  ws = None\n  while ws == None:\n    try:\n      ws = app['feed']\n    except Exception as e:\n      logger.info (\"error: {}\".format(e))\n      await asyncio.sleep(1)\n  global img_str\n  while True:\n    try:\n      await ws.send_bytes(img_str.tostring())\n    except Exception:\n      ws = app['feed']\n    await asyncio.sleep(feed['number_fps_second'])\n\nasync def feedHandle(request):\n  logger.info ('feed handle')\n  response = web.StreamResponse()\n  response.content_type = ('multipart/x-mixed-replace; '\n                           'boundary=--frameboundary')\n  await response.prepare(request)\n\n  async def write(img_bytes):\n      \"\"\"Write image to stream.\"\"\"\n      await response.write(bytes(\n          '--frameboundary\\r\\n'\n          'Content-Type: {}\\r\\n'\n          'Content-Length: {}\\r\\n\\r\\n'.format(\n              response.content_type, len(img_bytes)),\n          'utf-8') + img_bytes + b'\\r\\n')\n  global gimage\n\n  try:\n      while True:\n        result, image = cv2.imencode('.jpg', gimage)\n        await write(image.tostring())\n        await asyncio.sleep(feed['number_fps_second'])\n  except asyncio.CancelledError:\n      logger.info(\"Stream closed by frontend.\")\n      response = None\n  except Exception as e:\n    logger.info(\"Stream close unexptdly, \", e)\n  finally:\n      if response is not None:\n          await response.write_eof()\n\nasync def add(_id, photo, firstname, lastname, _oldName):\n  newName = _id + '.' + firstname + '_' + lastname\n  oldName = '0.' + _oldName\n  with open(\"./known/\"+_id+\".\"+ firstname+\"_\"+ lastname +\".jpg\", \"wb\") as fh:\n      fh.write(base64.decodebytes(str.encode(photo)))\n  await fc['face_recognition'].delete_unknown_names(oldName)\n  await fc['face_recognition'].unknown_people( None, newName, cv2.imdecode(np.frombuffer(base64.decodebytes(str.encode(photo)), dtype=np.uint8), cv2.IMREAD_COLOR))\n  try:\n    _capture[newName] = _capture[oldName]\n    del _capture[oldName]\n    logger.info(\"Added\")\n  except Exception as e:\n    logger.info (\"Unexpected error: {}\".format(e))\n    pass\n\n#CHANGE KNOWN FOLDER TO VAR\nasync def delete(_id, firstname, lastname):\n  os.remove(\"./known/\" + _id + '.' + firstname + '_' + lastname + \".jpg\")\n  del _capture[_id + '.' + firstname + '_' + lastname]\n  await fc['face_recognition'].delete_unknown_names(_id + '.' + firstname + '_' + lastname)\n  logger.info ('delete{}'.format(_id))\n\nasync def ping(app,n):\n  control = None\n  while control == None:\n    try:\n      control = app['control']\n    except Exception as e:\n      logger.info (\"error: {}\".format(e))\n      await asyncio.sleep(1)\n  while True:\n    control = app['control']\n    print('ping')\n    await asyncio.sleep(n)\n    await control.send_str(json.dumps({\"action\":\"ping\",\"uuid\":str(app['uuid'])}))\n\nasync def control(app):\n  try:\n    #session = aiohttp.ClientSession()\n    #async with session.ws_connect(f'ws://localhost:1880/control') as ws:\n    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:\n      async with session.ws_connect(f'wss://api.exception34.com/control', heartbeat=1, receive_timeout=5) as ws:\n        app['control'] = ws\n        logger.info ('ws connected')\n        async for msg in ws:\n          payload = json.loads(msg.data)\n          logger.info (\"message: {}\".format(payload['action']))\n          #await ws.send_str('hello')\n          #await callback(msg.data)\n          if msg.type == aiohttp.WSMsgType.TEXT:\n            if payload['action'] == \"debug\":\n              await callback(payload['payload'])\n\n            elif payload['action'] == \"add\":\n              await add(payload['id'],payload['photo'],payload['firstname'], payload['lastname'],payload['oldName'])\n\n            elif payload['action'] == \"delete\":\n              await delete(payload['id'],payload['firstname'], payload['lastname'])\n\n            elif payload['action'] == \"start\":\n              feed['feedURL'] = \"rtsp://184.72.239.149/vod/mp4:BigBuckBunny_175k.mov\"\n              await start_feed(app)\n\n            elif payload['action'] == \"stop\":\n              app['feedler'].cancel()\n              await app['feedler']\n              await app['feed'].close()\n              app['feed_task'].cancel()\n              await app['feed_task']\n\n            elif payload['action'] == \"quality\":\n              feed['quality'] = int(payload['value'])\n\n            elif payload['action'] == \"fps\":\n              feed['number_fps_second'] = float(payload['value'])\n\n            elif payload['action'] == \"modulo\":\n              feed['modulo'] = int(payload['value'])\n\n            elif payload['action'] == \"mjpeg\":\n              feed['mjpegToggle'] = int(payload['value'])\n              if feed['mjpegToggle'] == 1:\n                await init_feed(app)\n                await init_mjpeg(app)\n              else:\n                app['mjpeg_task'].cancel()\n                await app['mjpeg_task']\n                app['feedler'].cancel()\n                await app['feedler']\n\n            elif payload['action'] == \"size\":\n              feed['video_size'] = int(payload['value'])\n\n            elif payload['action'] == \"feed\":\n              feed['_camera'].stop()\n              feed['_camera'] = WebcamVideoStream(src=payload['value']).start()\n            elif msg.type == aiohttp.WSMsgType.CLOSED:\n              break\n            elif msg.type == aiohttp.WSMsgType.ERROR:\n              break\n  except Exception as e:\n    logger.info (\"Unexpected error: {}\".format(e))\n    pass\n  finally:\n    app['control_task'] = app.loop.create_task(control(app))\n\nasync def feedsocket(app):\n  try:\n    #session2 = aiohttp.ClientSession()\n    #async with session2.ws_connect(f'ws://localhost:1880/feed2') as ws:\n    session2 = aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False))\n    async with session2.ws_connect(f'wss://api.exception34.com/feed2', heartbeat=1, receive_timeout=5) as ws:\n      app['feed'] = ws\n      logger.info ('feed connected')\n      async for msg in ws:\n        logger.info (msg)\n  except Exception:\n    pass\n  finally:\n    app['feed_task'] = app.loop.create_task(feedsocket(app))\n\nasync def init_mjpeg(app):\n  app['mjpeg_task'] = app.loop.create_task(mjpeg_video(app))\n\nasync def init_control(app):\n  app['control_task'] = app.loop.create_task(control(app))\n  asyncio.ensure_future(ping(app,20))  # create a new Task\n\n\nasync def init_feed(app):\n  app['feed_task'] = app.loop.create_task(feedsocket(app))\n\nasync def start_feed(app):\n  app['feedler'] = app.loop.create_task(process_video(app))\n\nasync def on_shutdown(app):\n  logger.info ('shutdown')\n  afile = open(r'./.config', 'wb')\n  pickle.dump(prototxt, afile)\n  afile.close()\n\nasync def cleanup_background_tasks(app):\n  logger.info('cleanup background tasks...')\n  await app['control'].close()\n  app['control_task'].cancel()\n  try:\n    await app['feed'].close()\n    app['feed_task'].cancel()\n  except Exception as e:\n    pass\n  finally:\n    logger.info (\"cleanup background tasks completed.\")\n\ndef main():\n  app = web.Application()\n  app.on_startup.append(init)\n\n  app.router.add_route('GET', '/feed', feedHandle)\n\n  app.on_startup.append(init_control)\n\n  app.on_cleanup.append(cleanup_background_tasks)\n  app.on_shutdown.append(on_shutdown)\n\n  web.run_app(app, host=host, port=port)\n\nif __name__ == '__main__':\n  main()\n",
 			"settings":
 			{
-				"buffer_size": 1327,
+				"buffer_size": 26593,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/requirements.txt",
+			"settings":
+			{
+				"buffer_size": 85,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
 			"contents": "\"\"\"\nProxy camera platform that enables image processing of camera data.\nFor more details about this platform, please refer to the documentation\nhttps://home-assistant.io/components/proxy\n\"\"\"\nimport logging\nimport asyncio\nimport aiohttp\nimport async_timeout\n\nREQUIREMENTS = ['pillow==5.0.0']\n\n_LOGGER = logging.getLogger(__name__)\n\nCONF_MAX_IMAGE_WIDTH = \"max_image_width\"\nCONF_IMAGE_QUALITY = \"image_quality\"\nCONF_IMAGE_REFRESH_RATE = \"image_refresh_rate\"\nCONF_FORCE_RESIZE = \"force_resize\"\nCONF_MAX_STREAM_WIDTH = \"max_stream_width\"\nCONF_STREAM_QUALITY = \"stream_quality\"\nCONF_CACHE_IMAGES = \"cache_images\"\n\nDEFAULT_BASENAME = \"Camera Proxy\"\nDEFAULT_QUALITY = 75\n\nasync def async_setup_platform(hass, config, async_add_devices,\n                               discovery_info=None):\n    \"\"\"Set up the Proxy camera platform.\"\"\"\n    async_add_devices([ProxyCamera(hass, config)])\n\n\ndef _resize_image(image, opts):\n    \"\"\"Resize image.\"\"\"\n    from PIL import Image\n    import io\n\n    if not opts:\n        return image\n\n    quality = opts.quality or DEFAULT_QUALITY\n    new_width = opts.max_width\n\n    img = Image.open(io.BytesIO(image))\n    imgfmt = str(img.format)\n    if imgfmt != 'PNG' and imgfmt != 'JPEG':\n        _LOGGER.debug(\"Image is of unsupported type: %s\", imgfmt)\n        return image\n\n    (old_width, old_height) = img.size\n    old_size = len(image)\n    if old_width <= new_width:\n        if opts.quality is None:\n            _LOGGER.debug(\"Image is smaller-than / equal-to requested width\")\n            return image\n        new_width = old_width\n\n    scale = new_width / float(old_width)\n    new_height = int((float(old_height)*float(scale)))\n\n    img = img.resize((new_width, new_height), Image.ANTIALIAS)\n    imgbuf = io.BytesIO()\n    img.save(imgbuf, \"JPEG\", optimize=True, quality=quality)\n    newimage = imgbuf.getvalue()\n    if not opts.force_resize and len(newimage) >= old_size:\n        _LOGGER.debug(\"Using original image(%d bytes) \"\n                      \"because resized image (%d bytes) is not smaller\",\n                      old_size, len(newimage))\n        return image\n\n    _LOGGER.debug(\"Resized image \"\n                  \"from (%dx%d - %d bytes) \"\n                  \"to (%dx%d - %d bytes)\",\n                  old_width, old_height, old_size,\n                  new_width, new_height, len(newimage))\n    return newimage\n\n\nclass ImageOpts():\n    \"\"\"The representation of image options.\"\"\"\n\n    def __init__(self, max_width, quality, force_resize):\n        \"\"\"Initialize image options.\"\"\"\n        self.max_width = max_width\n        self.quality = quality\n        self.force_resize = force_resize\n\n    def __bool__(self):\n        \"\"\"Bool evalution rules.\"\"\"\n        return bool(self.max_width or self.quality)\n\n\nclass ProxyCamera(Camera):\n    \"\"\"The representation of a Proxy camera.\"\"\"\n\n    def __init__(self, hass, config):\n        \"\"\"Initialize a proxy camera component.\"\"\"\n        super().__init__()\n        self.hass = hass\n        self._proxied_camera = config.get(CONF_ENTITY_ID)\n        self._name = (\n            config.get(CONF_NAME) or\n            \"{} - {}\".format(DEFAULT_BASENAME, self._proxied_camera))\n        self._image_opts = ImageOpts(\n            config.get(CONF_MAX_IMAGE_WIDTH),\n            config.get(CONF_IMAGE_QUALITY),\n            config.get(CONF_FORCE_RESIZE))\n\n        self._stream_opts = ImageOpts(\n            config.get(CONF_MAX_STREAM_WIDTH),\n            config.get(CONF_STREAM_QUALITY),\n            True)\n\n        self._image_refresh_rate = config.get(CONF_IMAGE_REFRESH_RATE)\n        self._cache_images = bool(\n            config.get(CONF_IMAGE_REFRESH_RATE)\n            or config.get(CONF_CACHE_IMAGES))\n        self._last_image_time = 0\n        self._last_image = None\n        self._headers = (\n            {HTTP_HEADER_HA_AUTH: self.hass.config.api.api_password}\n            if self.hass.config.api.api_password is not None\n            else None)\n\n    def camera_image(self):\n        \"\"\"Return camera image.\"\"\"\n        return run_coroutine_threadsafe(\n            self.async_camera_image(), self.hass.loop).result()\n\n    async def async_camera_image(self):\n        \"\"\"Return a still image response from the camera.\"\"\"\n        now = dt_util.utcnow()\n\n        if (self._image_refresh_rate and\n                now < self._last_image_time + self._image_refresh_rate):\n            return self._last_image\n\n        self._last_image_time = now\n        url = \"{}/api/camera_proxy/{}\".format(\n            self.hass.config.api.base_url, self._proxied_camera)\n        try:\n            websession = async_get_clientsession(self.hass)\n            with async_timeout.timeout(10, loop=self.hass.loop):\n                response = await websession.get(url, headers=self._headers)\n            image = await response.read()\n        except asyncio.TimeoutError:\n            _LOGGER.error(\"Timeout getting camera image\")\n            return self._last_image\n        except aiohttp.ClientError as err:\n            _LOGGER.error(\"Error getting new camera image: %s\", err)\n            return self._last_image\n\n        image = await self.hass.async_add_job(\n            _resize_image, image, self._image_opts)\n\n        if self._cache_images:\n            self._last_image = image\n        return image\n\n    async def handle_async_mjpeg_stream(self, request):\n        \"\"\"Generate an HTTP MJPEG stream from camera images.\"\"\"\n        websession = async_get_clientsession(self.hass)\n        url = \"{}/api/camera_proxy_stream/{}\".format(\n            self.hass.config.api.base_url, self._proxied_camera)\n        stream_coro = websession.get(url, headers=self._headers)\n\n        if not self._stream_opts:\n            await async_aiohttp_proxy_web(self.hass, request, stream_coro)\n            return\n\n        response = aiohttp.web.StreamResponse()\n        response.content_type = ('multipart/x-mixed-replace; '\n                                 'boundary=--frameboundary')\n        await response.prepare(request)\n\n        async def write(img_bytes):\n            \"\"\"Write image to stream.\"\"\"\n            await response.write(bytes(\n                '--frameboundary\\r\\n'\n                'Content-Type: {}\\r\\n'\n                'Content-Length: {}\\r\\n\\r\\n'.format(\n                    self.content_type, len(img_bytes)),\n                'utf-8') + img_bytes + b'\\r\\n')\n\n        with async_timeout.timeout(10, loop=self.hass.loop):\n            req = await stream_coro\n\n        try:\n            # This would be nicer as an async generator\n            # But that would only be supported for python >=3.6\n            data = b''\n            stream = req.content\n            while True:\n                chunk = await stream.read(102400)\n                if not chunk:\n                    break\n                data += chunk\n                jpg_start = data.find(b'\\xff\\xd8')\n                jpg_end = data.find(b'\\xff\\xd9')\n                if jpg_start != -1 and jpg_end != -1:\n                    image = data[jpg_start:jpg_end + 2]\n                    image = await self.hass.async_add_job(\n                        _resize_image, image, self._stream_opts)\n                    await write(image)\n                    data = data[jpg_end + 2:]\n        except asyncio.CancelledError:\n            _LOGGER.debug(\"Stream closed by frontend.\")\n            req.close()\n            response = None\n\n        finally:\n            if response is not None:\n                await response.write_eof()\n\n    @property\n    def name(self):\n        \"\"\"Return the name of this camera.\"\"\"\n        return self._name",
-			"file": "test.py",
-			"file_size": 1022,
-			"file_write_time": 131721547439851085,
 			"settings":
 			{
 				"buffer_size": 7507,
@@ -131,6 +124,22 @@
 		"selected_items":
 		[
 			[
+				"in",
+				"Package Control: Install Package"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"isnta",
+				"Package Control: Install Package"
+			],
+			[
 				"gitsavvy",
 				"GitSavvy: help"
 			],
@@ -139,15 +148,7 @@
 				"ReadmePlease"
 			],
 			[
-				"remove",
-				"Package Control: Remove Package"
-			],
-			[
 				"install",
-				"Package Control: Install Package"
-			],
-			[
-				"insta",
 				"Package Control: Install Package"
 			],
 			[
@@ -192,25 +193,24 @@
 	"expanded_folders":
 	[
 		"/Users/admin/Downloads/dev/py",
-		"/Users/admin/Downloads/dev/Smart-Bell-master/python",
-		"/Users/admin/Downloads/dev/Smart-Bell-master/python/__pycache__",
-		"/Users/admin/Downloads/dev/Smart-Bell-master/frontend",
-		"/Users/admin/Downloads/dev/Smart-Bell-master/frontend/src",
-		"/Users/admin/Downloads/dev/Smart-Bell-master/frontend/src/components",
-		"/Users/admin/Downloads/dev/Smart-Bell-master/frontend/src/components/auth"
+		"/Users/admin/Downloads/dev/py/src"
 	],
 	"file_history":
 	[
+		"/Users/admin/Downloads/dev/py/py.sublime-project",
+		"/Users/admin/Downloads/dev/py/.gitignore",
+		"/Users/admin/Downloads/dev/py/Dockerfile",
 		"/Users/admin/Downloads/dev/py/test.py",
-		"/Users/admin/Downloads/dev/Smart-Bell-master/python/videostream.py",
-		"/Users/admin/Downloads/dev/dash/src/layouts/Dashboard.jsx",
 		"/Users/admin/Downloads/dev/py/camera.py",
+		"/Users/admin/Downloads/dev/Smart-Bell-master/python/usbcamera.py",
+		"/Users/admin/Downloads/dev/Smart-Bell-master/python/videostream.py",
 		"/Users/admin/Downloads/dev/py/cli.py",
+		"/Users/admin/Desktop/face/work_crop_align_resize/test.py",
+		"/Users/admin/Downloads/dev/dash/src/layouts/Dashboard.jsx",
 		"/Users/admin/Downloads/increasing-webcam-fps/server.js",
 		"/Users/admin/Desktop/face/work_crop_align_resize/detect_faces_video.py",
 		"/Users/admin/Desktop/face/work_crop_align_resize/cli.py",
 		"/Users/admin/Desktop/face/work_crop_align_resize/camera.py",
-		"/Users/admin/Desktop/face/work_crop_align_resize/test.py",
 		"/Users/admin/Downloads/increasing-webcam-fps/build.sh",
 		"/Users/admin/Downloads/increasing-webcam-fps/video.html",
 		"/Users/admin/Downloads/increasing-webcam-fps/fps_demo.py",
@@ -236,6 +236,7 @@
 		"height": 132.0,
 		"where_history":
 		[
+			""
 		]
 	},
 	"find_state":
@@ -243,6 +244,107 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"send",
+			"scan",
+			"uuid",
+			"toggle",
+			"debug",
+			"'debug",
+			"asyncio.s",
+			"asyncio.",
+			"'feed",
+			"feed",
+			"feedURL",
+			"5000",
+			"HOST",
+			"host",
+			"OpenCL",
+			"OpenC",
+			"Open",
+			"OPEN",
+			"OPEN C",
+			"logger.",
+			"fc['",
+			"fc =",
+			"confidence",
+			"toggleDebug",
+			"callback",
+			"shutd",
+			"fc['",
+			"uuid",
+			"fc['",
+			"fc['mjpeg_task']",
+			"fc['feed_task']",
+			"fc['feedler']",
+			"fc['",
+			"fc['control_task']",
+			"fc['feed']",
+			"fc['img_str']",
+			"fc['",
+			"fc['face_recognition']",
+			"fc['net']",
+			"fc['",
+			"fc['control']",
+			"fc['con",
+			"fc['known_people_folder']",
+			"fc['_capture']",
+			"fc['shutdown']",
+			"fc['gimage']",
+			"fc['timer']",
+			"control(",
+			"control;(",
+			"feedHandle",
+			"init_mjpeg",
+			"app",
+			"app[",
+			"img_str",
+			"stopHandle",
+			"_capture",
+			"timer",
+			"shutdown",
+			"gimage",
+			"global",
+			"gimage",
+			"app[",
+			"port",
+			"send",
+			"json.dumps(",
+			"send_str",
+			"knownall",
+			"add",
+			"known_people_folder",
+			"add\"",
+			"known",
+			"know",
+			"known",
+			"read",
+			"_camera",
+			"feedURL",
+			"gimage",
+			"pick",
+			"'] ",
+			"feed['qu",
+			"face_recognition",
+			"video_s",
+			"'color_know']n",
+			"banner",
+			"color_banner",
+			"ffmpeg_feed",
+			"video_size",
+			"banner",
+			"quality",
+			"number_fps_second",
+			"thickness",
+			"color_know",
+			"color_unknow",
+			"modulo",
+			"banner",
+			"toggleDebug",
+			"confide",
+			"protot",
+			"known",
+			"shape",
+			"config",
 			"timer",
 			"face_recognition",
 			"unkno",
@@ -269,58 +371,7 @@
 			"unex",
 			"video_size",
 			"logger",
-			"print",
-			"enum",
-			"as ws",
-			"logger",
-			"logger.",
-			"logging",
-			"print",
-			"control",
-			"GP",
-			"GPU",
-			"pymo",
-			"pymongo",
-			"Web",
-			"Vide",
-			"mjpeg",
-			"Webca",
-			"knownall",
-			"ws",
-			"local",
-			"ws",
-			"pop",
-			"length",
-			"llength",
-			"start",
-			"startW",
-			"startwi",
-			"print",
-			"pop",
-			"None",
-			"enco",
-			"unkn",
-			"None",
-			"todo",
-			"print (m",
-			"print (me",
-			"globa",
-			"start_timer",
-			"_capture",
-			"prin",
-			"print",
-			"_capture",
-			"_Str",
-			"unk",
-			"arra",
-			"array",
-			"print",
-			"spli",
-			"for",
-			"face_recognition",
-			"write",
-			"exception34",
-			"'ws'"
+			"print"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -328,6 +379,33 @@
 		"regex": false,
 		"replace_history":
 		[
+			"handler.",
+			"comm['mjpeg_task']",
+			"comm['feed_task']",
+			"comm['feedler']",
+			"comm['control_task']",
+			"comm['feed']",
+			"local['img_str']",
+			"local['face_recognition']",
+			"local['net']",
+			"comm['control']",
+			"local['known_people_folder']",
+			"local['_capture']",
+			"local['shutdown']",
+			"local['gimage']",
+			"local['timer']",
+			"fc[",
+			"fc['face_recognition']",
+			"'color_know']",
+			"feed['color_banner']",
+			"feed['ffmpeg_feed']",
+			"feed['video_size']",
+			"feed['banner']",
+			"feed['quality']",
+			"feed['number_fps_second']",
+			"feed['thickness']",
+			"feed['color_know']",
+			"feed['color_unknow']",
 			"await face_recognition",
 			"logger.info",
 			"logger"
@@ -341,92 +419,50 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 6,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "camera.py",
+					"file": "src/camera.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 22890,
+						"buffer_size": 27105,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								16124,
-								16124
+								17843,
+								17843
 							]
 						],
 						"settings":
 						{
-							"SL.1017.region_keys":
+							"SL.110.region_keys":
 							[
 							],
-							"SL.215.region_keys":
+							"SL.126.region_keys":
 							[
 							],
-							"SL.232.region_keys":
+							"SL.13.region_keys":
 							[
 							],
-							"SL.238.region_keys":
+							"SL.178.region_keys":
 							[
 							],
-							"SL.24.region_keys":
+							"SL.196.region_keys":
 							[
 							],
-							"SL.244.region_keys":
+							"SL.273.region_keys":
 							[
 							],
-							"SL.290.region_keys":
+							"SL.61.region_keys":
 							[
 							],
-							"SL.335.region_keys":
-							[
-							],
-							"SL.371.region_keys":
-							[
-							],
-							"SL.446.region_keys":
-							[
-							],
-							"SL.471.region_keys":
-							[
-							],
-							"SL.610.region_keys":
-							[
-							],
-							"SL.621.region_keys":
-							[
-							],
-							"SL.693.region_keys":
-							[
-							],
-							"SL.728.region_keys":
-							[
-							],
-							"SL.743.region_keys":
-							[
-							],
-							"SL.771.region_keys":
-							[
-							],
-							"SL.785.region_keys":
-							[
-							],
-							"SL.827.region_keys":
-							[
-							],
-							"SL.869.region_keys":
-							[
-							],
-							"SL.883.region_keys":
-							[
-							],
-							"SL.916.region_keys":
+							"SL.78.region_keys":
 							[
 							],
 							"auto_complete": false,
@@ -436,12 +472,27 @@
 							{
 								"close":
 								{
+									"1":
+									[
+										22436,
+										22437
+									]
 								},
 								"icon":
 								{
+									"1":
+									[
+										"Packages/BracketHighlighter/icons/square_bracket.png",
+										"region.bluish"
+									]
 								},
 								"open":
 								{
+									"1":
+									[
+										22431,
+										22432
+									]
 								},
 								"unmatched":
 								{
@@ -454,250 +505,56 @@
 								"bh_curly_open",
 								"bh_curly_close",
 								"bh_curly_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
 								"bh_regex",
 								"bh_regex_center",
 								"bh_regex_open",
 								"bh_regex_close",
 								"bh_regex_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content"
-							],
-							"bracket_highlighter.locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.regions":
-							[
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
 								"bh_c_define",
 								"bh_c_define_center",
 								"bh_c_define_open",
 								"bh_c_define_close",
 								"bh_c_define_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content"
-							],
-							"git_gutter_is_enabled": true,
-							"git_savvy.repo_path": "/Users/admin/Downloads/dev/py",
-							"syntax": "Packages/Python/Python.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 8447.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 10178,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2501,
-								2524
-							]
-						],
-						"settings":
-						{
-							"auto_complete": false,
-							"bracket_highlighter.busy": false,
-							"bracket_highlighter.clone": -1,
-							"bracket_highlighter.clone_locations":
-							{
-								"close":
-								{
-									"1":
-									[
-										469,
-										470
-									]
-								},
-								"icon":
-								{
-									"1":
-									[
-										"Packages/BracketHighlighter/icons/curly_bracket.png",
-										"region.purplish"
-									]
-								},
-								"open":
-								{
-									"1":
-									[
-										424,
-										425
-									]
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.clone_regions":
-							[
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
 								"bh_tag",
 								"bh_tag_center",
 								"bh_tag_open",
 								"bh_tag_close",
 								"bh_tag_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content"
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content"
 							],
 							"bracket_highlighter.locations":
 							{
@@ -705,950 +562,8 @@
 								{
 									"1":
 									[
-										2524,
-										2525
-									]
-								},
-								"icon":
-								{
-									"1":
-									[
-										"Packages/BracketHighlighter/icons/double_quote.png",
-										"region.greenish"
-									]
-								},
-								"open":
-								{
-									"1":
-									[
-										2500,
-										2501
-									]
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.regions":
-							[
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content"
-							],
-							"default_dir": "/Users/admin/Downloads/dev/py",
-							"git_gutter_is_enabled": false,
-							"syntax": "Packages/HTML/HTML.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 7283.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "/Users/admin/Desktop/face/work_crop_align_resize/test.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 12889,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2467,
-								2467
-							]
-						],
-						"settings":
-						{
-							"bracket_highlighter.busy": false,
-							"bracket_highlighter.clone": -1,
-							"bracket_highlighter.clone_locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.clone_regions":
-							[
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content"
-							],
-							"bracket_highlighter.locations":
-							{
-								"close":
-								{
-									"1":
-									[
-										2477,
-										2478
-									]
-								},
-								"icon":
-								{
-									"1":
-									[
-										"Packages/BracketHighlighter/icons/single_quote.png",
-										"region.greenish"
-									]
-								},
-								"open":
-								{
-									"1":
-									[
-										2449,
-										2450
-									]
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.regions":
-							[
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content"
-							],
-							"git_gutter_is_enabled": false,
-							"syntax": "Packages/Python/Python.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 531.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "cli.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2872,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								360,
-								360
-							]
-						],
-						"settings":
-						{
-							"SL.472.region_keys":
-							[
-							],
-							"SL.611.region_keys":
-							[
-							],
-							"SL.622.region_keys":
-							[
-							],
-							"auto_complete": false,
-							"bracket_highlighter.busy": false,
-							"bracket_highlighter.clone": -1,
-							"bracket_highlighter.clone_locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.clone_regions":
-							[
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content"
-							],
-							"bracket_highlighter.locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.regions":
-							[
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content"
-							],
-							"git_gutter_is_enabled": true,
-							"git_savvy.repo_path": "/Users/admin/Downloads/dev/py",
-							"syntax": "Packages/Python/Python.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 2.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "/Users/admin/Downloads/dev/Smart-Bell-master/python/videostream.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2410,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								762,
-								769
-							]
-						],
-						"settings":
-						{
-							"auto_complete": false,
-							"bracket_highlighter.busy": false,
-							"bracket_highlighter.clone": -1,
-							"bracket_highlighter.clone_locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.clone_regions":
-							[
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content"
-							],
-							"bracket_highlighter.locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.regions":
-							[
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content"
-							],
-							"git_gutter_is_enabled": false,
-							"syntax": "Packages/Python/Python.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "/Users/admin/Downloads/dev/Smart-Bell-master/python/usbcamera.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1327,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								320,
-								369
-							]
-						],
-						"settings":
-						{
-							"auto_complete": false,
-							"bracket_highlighter.busy": false,
-							"bracket_highlighter.clone": -1,
-							"bracket_highlighter.clone_locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.clone_regions":
-							[
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content"
-							],
-							"bracket_highlighter.locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.regions":
-							[
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content"
-							],
-							"git_gutter_is_enabled": false,
-							"syntax": "Packages/Python/Python.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 149.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "test.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 7507,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								5648,
-								5671
-							]
-						],
-						"settings":
-						{
-							"SL.733.region_keys":
-							[
-							],
-							"SL.886.region_keys":
-							[
-							],
-							"auto_complete": false,
-							"bracket_highlighter.busy": false,
-							"bracket_highlighter.clone": -1,
-							"bracket_highlighter.clone_locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.clone_regions":
-							[
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content"
-							],
-							"bracket_highlighter.locations":
-							{
-								"close":
-								{
-									"1":
-									[
-										5703,
-										5704
+										17843,
+										17844
 									]
 								},
 								"icon":
@@ -1663,8 +578,8 @@
 								{
 									"1":
 									[
-										5671,
-										5672
+										17841,
+										17842
 									]
 								},
 								"unmatched":
@@ -1673,77 +588,1003 @@
 							},
 							"bracket_highlighter.regions":
 							[
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
 								"bh_curly",
 								"bh_curly_center",
 								"bh_curly_open",
 								"bh_curly_close",
 								"bh_curly_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
 								"bh_single_quote",
 								"bh_single_quote_center",
 								"bh_single_quote_open",
 								"bh_single_quote_close",
 								"bh_single_quote_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
 								"bh_tag",
 								"bh_tag_center",
 								"bh_tag_open",
 								"bh_tag_close",
 								"bh_tag_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content"
+							],
+							"git_gutter_is_enabled": true,
+							"git_savvy.repo_path": "/Users/admin/Downloads/dev/py",
+							"intellitip_row": 30,
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 8465.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "Dockerfile",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 688,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								13,
+								0
+							]
+						],
+						"settings":
+						{
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.clone": -1,
+							"bracket_highlighter.clone_locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.clone_regions":
+							[
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
 								"bh_regex",
 								"bh_regex_center",
 								"bh_regex_open",
 								"bh_regex_close",
-								"bh_regex_content"
+								"bh_regex_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content"
+							],
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content"
 							],
 							"git_gutter_is_enabled": true,
 							"git_savvy.repo_path": "/Users/admin/Downloads/dev/py",
+							"syntax": "Packages/Dockerfile Syntax Highlighting/Syntaxes/Dockerfile.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "src/cli.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2968,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2352,
+								2352
+							]
+						],
+						"settings":
+						{
+							"SL.14.region_keys":
+							[
+							],
+							"auto_complete": false,
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.clone": -1,
+							"bracket_highlighter.clone_locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.clone_regions":
+							[
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content"
+							],
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content"
+							],
+							"git_gutter_is_enabled": true,
+							"git_savvy.repo_path": "/Users/admin/Downloads/dev/py",
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 815.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 26593,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								26593,
+								26593
+							]
+						],
+						"settings":
+						{
+							"SL.15.region_keys":
+							[
+							],
+							"auto_complete": false,
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.clone": -1,
+							"bracket_highlighter.clone_locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.clone_regions":
+							[
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content"
+							],
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content"
+							],
+							"default_dir": "/Users/admin/Downloads/dev/py/src",
+							"git_gutter_is_enabled": false,
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "src/requirements.txt",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 85,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								85,
+								85
+							]
+						],
+						"settings":
+						{
+							"SL.16.region_keys":
+							[
+							],
+							"SL.68.region_keys":
+							[
+							],
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.clone": -1,
+							"bracket_highlighter.clone_locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.clone_regions":
+							[
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content"
+							],
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content"
+							],
+							"git_gutter_is_enabled": true,
+							"git_savvy.repo_path": "/Users/admin/Downloads/dev/py",
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7507,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6827,
+								6827
+							]
+						],
+						"settings":
+						{
+							"SL.17.region_keys":
+							[
+							],
+							"auto_complete": false,
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.clone": -1,
+							"bracket_highlighter.clone_locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.clone_regions":
+							[
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content"
+							],
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+									"1":
+									[
+										6834,
+										6835
+									]
+								},
+								"icon":
+								{
+									"1":
+									[
+										"Packages/BracketHighlighter/icons/single_quote.png",
+										"region.greenish"
+									]
+								},
+								"open":
+								{
+									"1":
+									[
+										6825,
+										6826
+									]
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content"
+							],
+							"default_dir": "/Users/admin/Downloads/dev/py",
+							"git_gutter_is_enabled": false,
 							"syntax": "Packages/Python/Python.sublime-syntax",
 							"tab_size": 4,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 741.0,
+						"translation.y": 2908.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 7,
 					"type": "text"
 				},
 				{
-					"buffer": 7,
+					"buffer": 6,
 					"semi_transient": false,
 					"settings":
 					{
@@ -1760,6 +1601,9 @@
 						],
 						"settings":
 						{
+							"SL.18.region_keys":
+							[
+							],
 							"auto_complete": false,
 							"bracket_highlighter.busy": false,
 							"bracket_highlighter.clone": -1,
@@ -1873,16 +1717,31 @@
 								"bh_curly_open",
 								"bh_curly_close",
 								"bh_curly_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
 								"bh_c_define",
 								"bh_c_define_center",
 								"bh_c_define_open",
 								"bh_c_define_close",
 								"bh_c_define_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
 								"bh_unmatched",
 								"bh_unmatched_center",
 								"bh_unmatched_open",
@@ -1893,50 +1752,35 @@
 								"bh_angle_open",
 								"bh_angle_close",
 								"bh_angle_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
 								"bh_round",
 								"bh_round_center",
 								"bh_round_open",
 								"bh_round_close",
 								"bh_round_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content"
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content"
 							],
 							"default_dir": "/Users/admin/Downloads/dev/py",
 							"git_gutter_is_enabled": false,
 							"syntax": "Packages/Python/Python.sublime-syntax"
 						},
-						"translation.x": 0.0,
-						"translation.y": 172.0,
+						"translation.x": 4.0,
+						"translation.y": 23.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 8,
+					"stack_index": 0,
 					"type": "text"
 				},
 				{
-					"buffer": 8,
+					"buffer": 7,
 					"semi_transient": false,
 					"settings":
 					{
@@ -1953,6 +1797,9 @@
 						],
 						"settings":
 						{
+							"SL.19.region_keys":
+							[
+							],
 							"auto_complete": false,
 							"bracket_highlighter.busy": false,
 							"bracket_highlighter.clone": -1,
@@ -1978,16 +1825,31 @@
 								"bh_curly_open",
 								"bh_curly_close",
 								"bh_curly_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
 								"bh_c_define",
 								"bh_c_define_center",
 								"bh_c_define_open",
 								"bh_c_define_close",
 								"bh_c_define_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
 								"bh_unmatched",
 								"bh_unmatched_center",
 								"bh_unmatched_open",
@@ -1998,36 +1860,21 @@
 								"bh_angle_open",
 								"bh_angle_close",
 								"bh_angle_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
 								"bh_round",
 								"bh_round_center",
 								"bh_round_open",
 								"bh_round_close",
 								"bh_round_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content"
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content"
 							],
 							"default_dir": "/Users/admin/Downloads/dev/py",
 							"git_gutter_is_enabled": false,
@@ -2039,7 +1886,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 6,
 					"type": "text"
 				}
 			]
@@ -2047,7 +1894,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 48.0
+		"height": 23.0
 	},
 	"input":
 	{
@@ -2146,7 +1993,7 @@
 	"show_open_files": true,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 128.0,
+	"side_bar_width": 188.0,
 	"status_bar_visible": true,
 	"template_settings":
 	{

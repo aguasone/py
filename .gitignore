@@ -6,3 +6,5 @@ src/known/
 venv
 *.pyc
 *.log
+
+src/\.config

@@ -18,6 +18,8 @@ class Recon():
 
 
 	def scan_known_people(self):
+		self.known_names = []
+		self.known_face_encodings = []
 		for file in self.image_files_in_folder():
 			basename = os.path.splitext(os.path.basename(file))[0]
 			img = face_recognition.load_image_file(file)
@@ -86,8 +88,10 @@ class Recon():
 			if v == name:
 				try:
 					del self.known_names[i]
+					del self.known_face_encodings[i]
 				except Exception as e:
 					print ("Already Deleted: ", e)
+
 
 	def image_files_in_folder(self):
 		return [os.path.join(self.known_people_folder, f) for f in os.listdir(self.known_people_folder) if re.match(r'.*\.(jpg|jpeg|png)', f, flags=re.I)]
