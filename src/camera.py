@@ -620,10 +620,10 @@ async def hello(n):
 async def control():
 	try:
 		await asyncio.sleep(1)
-		#session = aiohttp.ClientSession()
-		#async with session.ws_connect(f'ws://localhost:1880/control') as ws:
-		async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
-			async with session.ws_connect(f'wss://api.exception34.com/control', heartbeat=2, receive_timeout=5) as ws:
+		async with aiohttp.ClientSession() as session:
+			async with session.ws_connect(f'ws://control:1880/control') as ws:
+		#async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
+			#async with session.ws_connect(f'wss://172.10.0.201:1880/control', heartbeat=2, receive_timeout=5) as ws:
 				comm['control'] = ws
 				logger.info ('control connected')
 				async for msg in ws:
@@ -706,10 +706,10 @@ async def control():
 async def feedsocket():
 	try:
 		await asyncio.sleep(1)
-		#session2 = aiohttp.ClientSession()
-		#async with session2.ws_connect(f'ws://localhost:1880/feed2') as ws:
-		async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session2:
-			async with session2.ws_connect(f'wss://api.exception34.com/feed2', heartbeat=2, receive_timeout=5) as ws:
+		async with aiohttp.ClientSession() as session:
+			async with session.ws_connect(f'ws://control:1880/feed2') as ws:
+		#async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session2:
+			#async with session2.ws_connect(f'wss://api.exception34.com/feed2', heartbeat=2, receive_timeout=5) as ws:
 				comm['feed'] = ws
 				logger.info ('feed connected')
 				async for msg in ws:

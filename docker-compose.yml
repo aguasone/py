@@ -6,7 +6,7 @@ services:
       - "1880:1880"
     networks:
       backend:
-        # ipv4_address: 172.10.0.100
+        ipv4_address: 172.10.0.200
     extra_hosts:
       - "db:172.10.0.201"
   db:
@@ -18,9 +18,20 @@ services:
     command: "--smallfiles --logpath=/dev/null"
     networks:
       backend:
-        # ipv4_address: 172.10.0.101
+        ipv4_address: 172.10.0.201
     extra_hosts:
       - "control:172.10.0.200"
+  api:
+    image: loopback-api
+    ports:
+      - "3001:3000"
+    networks:
+      backend:
+        ipv4_address: 172.10.0.202
+    extra_hosts:
+      - "db:172.10.0.201"
+    depends_on:
+     - db
   camera:
     image: camera-app
     volumes:
