@@ -1,7 +1,7 @@
 version: "3"
 services:
   control:
-    image: ex34-nodered
+    image: control:latest
     ports:
       - "1880:1880"
     networks:
