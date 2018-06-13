@@ -10,6 +10,7 @@ import logging
 import datetime
 import pathlib
 import pickle
+import subprocess
 
 from aiohttp import web
 
@@ -78,6 +79,12 @@ def init():
 
 	fc['ip'] = socket.gethostbyname(socket.gethostname())
 	fc['hostname'] = socket.gethostname()
+
+	# proc = subprocess.Popen(["curl", "--unix-socket", "/var/run/docker.sock", "http://localhost/containers/"+fc['hostname']+"/json"], stdout=subprocess.PIPE)
+	proc = subprocess.call([
+		'curl', '--unix-socket', '/var/run/docker.sock', 'http://localhost/containers//'+fc['hostname']+'/json'
+			])
+	print (proc)
 
 	local['_capture'] = {}
 	local['shutdown'] = False

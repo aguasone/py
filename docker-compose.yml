@@ -13,16 +13,18 @@ services:
   db:
     image: mongo
     volumes:
-      - mongo-data:/data
+      - mongo-data:/data/db
     ports:
       - "27017:27017"
-    command: "--smallfiles --logpath=/dev/null"
     networks:
       backend:
         ipv4_address: 172.10.0.201
 
     extra_hosts:
       - "control:172.10.0.200"
+    # environment:
+    #   ME_CONFIG_MONGODB_ADMINUSERNAME: root
+    #   ME_CONFIG_MONGODB_ADMINPASSWORD: admin
   api:
     image: loopback-api
     ports:
@@ -37,8 +39,10 @@ services:
   camera:
     image: camera-app
     volumes:
-          - .:/data
+     - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
+    - "5000"
+    expose:
     - "5000"
     networks:
       backend:
@@ -46,6 +50,12 @@ services:
       - "control:172.10.0.200"
     depends_on:
      - control
+  # nginx-proxy:
+  #   image: jwilder/nginx-proxy
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - /var/run/docker.sock:/tmp/docker.sock:ro
 volumes:
   mongo-data:
 networks:
