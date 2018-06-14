@@ -12,6 +12,7 @@ import pathlib
 import pickle
 import subprocess
 
+
 from aiohttp import web
 
 import cv2
@@ -23,7 +24,6 @@ from imutils.face_utils import FaceAligner
 from imutils.face_utils import rect_to_bb
 from imutils.video import FPS
 from cli import Recon
-import json
 import base64
 from base64 import b64encode
 from skimage.measure import compare_ssim
@@ -57,6 +57,9 @@ def init():
 	global feed
 	global fc
 
+	fc['ip'] = socket.gethostbyname(socket.gethostname())
+	fc['hostname'] = socket.gethostname()
+
 	#reload object from file
 	try:
 		file2 = open(r'./.config', 'rb')
@@ -72,25 +75,27 @@ def init():
 		fc['shape_predictor'] = "shape_predictor_68_face_landmarks.dat"
 		fc['confidence'] = 0.8
 		feed['feedURL'] = "rtsp://184.72.239.149/vod/mp4:BigBuckBunny_175k.mov"
-		try:
-			fc['port'] = os.environ['HOST_PORT']
-		except:
-			fc['port'] = '5000'
+		fc['camera_name'] = fc['hostname']
 
-	fc['ip'] = socket.gethostbyname(socket.gethostname())
-	fc['hostname'] = socket.gethostname()
 
-	# proc = subprocess.Popen(["curl", "--unix-socket", "/var/run/docker.sock", "http://localhost/containers/"+fc['hostname']+"/json"], stdout=subprocess.PIPE)
-	proc = subprocess.call([
-		'curl', '--unix-socket', '/var/run/docker.sock', 'http://localhost/containers//'+fc['hostname']+'/json'
-			])
-	print (proc)
+	proc = subprocess.Popen(["curl", "--unix-socket", "/var/run/docker.sock", "http://localhost/containers/"+fc['hostname']+"/json"], stdout=subprocess.PIPE)
+	#proc = subprocess.Popen(["curl", "--unix-socket", "/var/run/docker.sock", "http://localhost/containers/f2ab98cd4eb0/json"], stdout=subprocess.PIPE)
+	stdout, stderr = proc.communicate()
+
+	j = json.loads(stdout)
+	try:
+		array = j['NetworkSettings']['Ports']['5000/tcp']
+		fc['port'] = array[0]['HostPort']
+	except KeyError:
+		fc['port'] = 5000
+
+
 
 	local['_capture'] = {}
 	local['shutdown'] = False
 	local['gimage'] = None
-	local['known_people_folder'] = 'known'
-	local['timer'] = 60
+	local['known_people_folder'] = 'known/camera'
+	local['timer'] = 600
 
 	# logger.info("loading shape-predictor...")
 	# fc['detector'] = dlib.get_frontal_face_detector()
@@ -115,6 +120,7 @@ def init():
 	#ffmpeg -f avfoundation -framerate 30 -i "0" -f mjpeg -q:v 100 -s 640x480 http://localhost:5000/feed
 	#ffmpeg -re -i ../../sabnzbd/complete/shows/The.Big.Bang.Theory.S11E22.mkv -f mjpeg -q:v 20 -s 640x480 http://localhost:5000/feed
 	#ffmpeg -f avfoundation -framerate 30 -i "0" -f mpegts udp://192.168.1.26:9999
+	#rtsp://admin:admin123@190.218.5.228:554
 	#TODO: add ffmpeg internally
 
 	feed['ffmpeg_feed'] = False
@@ -140,9 +146,13 @@ async def read_frame(_frames, _last_image, _count_unknown, _box, _text, _result)
 
 	c_fps = FPS().start()
 	image = feed['_camera'].read()
-	overlay = imutils.resize(image, width=feed['video_size'])
+	try:
+		overlay = imutils.resize(image, width=feed['video_size'])
+	except:
+		overlay = _last_image
 
-	overlay = cv2.flip( overlay, 1 )
+
+	#overlay = cv2.flip( overlay, 1 )
 
 	# if len(_last_image) > 0:
 	# 	err = np.sum((overlay.astype("float") - _last_image.astype("float")) ** 2)
@@ -245,7 +255,7 @@ async def read_frame(_frames, _last_image, _count_unknown, _box, _text, _result)
 						try:
 							control = comm['control']
 							logger.info('add known: {}'.format(str.split(array[0], '.')[0]))
-							await control.send_str(json.dumps({"action":"add_known", "date": time.strftime("%Y%m%d%H%M%S"), "name": str.split(array[0], '.')[0], "confidence":text[i], "image": base64_bytes.decode('utf-8'), "camera":fc['hostname']}))#, "image":  cropped.tolist()}))
+							await control.send_str(json.dumps({"action":"add_known", "date": time.strftime("%Y%m%d%H%M%S"), "name": str.split(array[0], '.')[0], "confidence":text[i], "image": base64_bytes.decode('utf-8'), "camera":fc['camera_name']}))#, "image":  cropped.tolist()}))
 						except TimeoutError:
 							logger.info("timeout")
 						finally:
@@ -286,7 +296,7 @@ async def read_frame(_frames, _last_image, _count_unknown, _box, _text, _result)
 						try:
 							control = comm['control']
 							logger.info('add unknown: {}'.format('unknown'+str(_count_unknown)))
-							await control.send_str(json.dumps({"action":"add_unknown", "date": time.strftime("%Y%m%d%H%M%S"), "name": 'unknown'+str(_count_unknown), "confidence":text[i], "image": base64_bytes.decode('utf-8'), "camera":fc['hostname']}))#, "image":  cropped.tolist()}))
+							await control.send_str(json.dumps({"action":"add_unknown", "date": time.strftime("%Y%m%d%H%M%S"), "name": 'unknown'+str(_count_unknown), "confidence":text[i], "image": base64_bytes.decode('utf-8'), "camera":fc['camera_name']}))#, "image":  cropped.tolist()}))
 						except Exception as e:
 							logger.info("error: ", e)
 							await asyncio.sleep(0)
@@ -584,8 +594,11 @@ async def feedHandle(request):
 async def add(_id, photo, firstname, lastname, _oldName):
 	newName = _id + '.' + firstname + '_' + lastname
 	oldName = '0.' + _oldName
-	with open("./known/"+_id+"."+ firstname+"_"+ lastname +".jpg", "wb") as fh:
+	try:
+		with open("./known/camera"+_id+"."+ firstname+"_"+ lastname +".jpg", "wb") as fh:
 			fh.write(base64.decodebytes(str.encode(photo)))
+	except:
+		pass
 	await local['face_recognition'].delete_unknown_names(oldName)
 	await local['face_recognition'].unknown_people( None, newName, cv2.imdecode(np.frombuffer(base64.decodebytes(str.encode(photo)), dtype=np.uint8), cv2.IMREAD_COLOR))
 	try:
@@ -593,12 +606,15 @@ async def add(_id, photo, firstname, lastname, _oldName):
 		del local['_capture'][oldName]
 		logger.info("Added")
 	except Exception as e:
-		logger.info ("Unexpected error: {}".format(e))
+		logger.info ("Unexpected error: ", e)
 		pass
 
 #CHANGE KNOWN FOLDER TO VAR
 async def delete(_id, firstname, lastname):
-	os.remove("./known/" + _id + '.' + firstname + '_' + lastname + ".jpg")
+	try:
+		os.remove("./known/camera/" + _id + '.' + firstname + '_' + lastname + ".jpg")
+	except:
+		pass
 	del local['_capture'][_id + '.' + firstname + '_' + lastname]
 	await local['face_recognition'].delete_unknown_names(_id + '.' + firstname + '_' + lastname)
 	logger.info ('delete{}'.format(_id))
@@ -691,11 +707,13 @@ async def control():
 								feed['video_size'] = int(payload['value'])
 
 						elif payload['action'] == "feed":
+							logger.info(payload['url'])
 							if payload['id'] == fc['hostname']:
-								if  payload['value'] == "0":
+								feed['camera_name'] = payload['name']
+								if  payload['url'] == "0":
 									feed['feedURL'] = 0
 								else:
-									feed['feedURL'] = payload['value']
+									feed['feedURL'] = payload['url']
 								fc['feedURL'] = feed['feedURL']
 								feed['_camera'].stop()
 								feed['_camera'] = WebcamVideoStream(src=feed['feedURL']).start()

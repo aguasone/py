@@ -4,6 +4,18 @@
 		"selected_items":
 		[
 			[
+				"ca",
+				"camera_name"
+			],
+			[
+				"camer",
+				"camera_name"
+			],
+			[
+				"camera",
+				"camera_name"
+			],
+			[
 				"loge",
 				"logger.info(\"loading"
 			],
@@ -44,62 +56,36 @@
 	"buffers":
 	[
 		{
-			"file": "src/camera.py",
-			"settings":
-			{
-				"buffer_size": 27105,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/cli.py",
-			"settings":
-			{
-				"buffer_size": 2968,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
 			"file": "docker-compose.yml",
 			"settings":
 			{
-				"buffer_size": 803,
+				"buffer_size": 1372,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "/Users/admin/Downloads/lynda/web/Big Data/DevOps Foundations- Continuous Delivery,Continuous Integration/Ex_Files_DevOps_Continuous_Delivery_Integration/Exercise Files/Course Environments/docker-compose.yml",
+			"file": "Dockerfile",
 			"settings":
 			{
-				"buffer_size": 877,
+				"buffer_size": 711,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"contents": "[{\"id\":\"82184aa9.f5d478\",\"type\":\"websocket out\",\"z\":\"38b53284.e0e7ce\",\"name\":\"out control\",\"server\":\"67285ec1.29a4f\",\"client\":\"\",\"x\":570,\"y\":300,\"wires\":[]},{\"id\":\"8ceb343a.e05558\",\"type\":\"base64\",\"z\":\"38b53284.e0e7ce\",\"name\":\"Encode\",\"action\":\"str\",\"property\":\"payload\",\"x\":220,\"y\":740,\"wires\":[[\"33e6f109.d3fa3e\"]]},{\"id\":\"2407af75.c471b\",\"type\":\"websocket in\",\"z\":\"38b53284.e0e7ce\",\"name\":\"entry control\",\"server\":\"67285ec1.29a4f\",\"client\":\"\",\"x\":330,\"y\":180,\"wires\":[[\"57cc63da.ffd0dc\",\"16750c42.228db4\"]]},{\"id\":\"9e36f1f3.353de\",\"type\":\"websocket in\",\"z\":\"38b53284.e0e7ce\",\"name\":\"entry feed\",\"server\":\"6d7bdba0.178454\",\"client\":\"\",\"x\":80,\"y\":740,\"wires\":[[\"8ceb343a.e05558\"]]},{\"id\":\"e01492d4.873f9\",\"type\":\"websocket out\",\"z\":\"38b53284.e0e7ce\",\"name\":\"out feed\",\"server\":\"b5eec0d5.b0e2a\",\"client\":\"\",\"x\":480,\"y\":620,\"wires\":[]},{\"id\":\"57cc63da.ffd0dc\",\"type\":\"json\",\"z\":\"38b53284.e0e7ce\",\"name\":\"\",\"property\":\"payload\",\"action\":\"obj\",\"pretty\":false,\"x\":490,\"y\":180,\"wires\":[[\"83a627cf.4e4fa8\",\"16750c42.228db4\"]]},{\"id\":\"16750c42.228db4\",\"type\":\"debug\",\"z\":\"38b53284.e0e7ce\",\"name\":\"debug\",\"active\":true,\"tosidebar\":true,\"console\":false,\"tostatus\":false,\"complete\":\"true\",\"x\":470,\"y\":240,\"wires\":[]},{\"id\":\"83a627cf.4e4fa8\",\"type\":\"switch\",\"z\":\"38b53284.e0e7ce\",\"name\":\"\",\"property\":\"payload.action\",\"propertyType\":\"msg\",\"rules\":[{\"t\":\"eq\",\"v\":\"hello\",\"vt\":\"str\"},{\"t\":\"eq\",\"v\":\"add_known\",\"vt\":\"str\"},{\"t\":\"eq\",\"v\":\"add_unknown\",\"vt\":\"str\"},{\"t\":\"eq\",\"v\":\"add\",\"vt\":\"str\"},{\"t\":\"eq\",\"v\":\"size\",\"vt\":\"str\"},{\"t\":\"eq\",\"v\":\"delete\",\"vt\":\"str\"},{\"t\":\"eq\",\"v\":\"feed\",\"vt\":\"str\"},{\"t\":\"eq\",\"v\":\"debug\",\"vt\":\"str\"},{\"t\":\"else\"}],\"checkall\":\"false\",\"repair\":false,\"outputs\":9,\"x\":550,\"y\":80,\"wires\":[[\"743122cc.26875c\",\"d037383d.e5af38\"],[\"743122cc.26875c\",\"dd28a9.caf62758\"],[\"743122cc.26875c\",\"dd28a9.caf62758\"],[\"743122cc.26875c\"],[\"743122cc.26875c\"],[\"743122cc.26875c\"],[\"743122cc.26875c\"],[\"743122cc.26875c\"],[\"76e5920a.9f330c\"]]},{\"id\":\"76e5920a.9f330c\",\"type\":\"debug\",\"z\":\"38b53284.e0e7ce\",\"name\":\"\",\"active\":true,\"tosidebar\":true,\"console\":false,\"tostatus\":false,\"complete\":\"true\",\"x\":1030,\"y\":160,\"wires\":[]},{\"id\":\"743122cc.26875c\",\"type\":\"change\",\"z\":\"38b53284.e0e7ce\",\"name\":\"\",\"rules\":[{\"t\":\"delete\",\"p\":\"_session\",\"pt\":\"msg\"}],\"action\":\"\",\"property\":\"\",\"from\":\"\",\"to\":\"\",\"reg\":false,\"x\":860,\"y\":40,\"wires\":[[\"82184aa9.f5d478\"]]},{\"id\":\"1ad67a3b.26cb06\",\"type\":\"inject\",\"z\":\"38b53284.e0e7ce\",\"name\":\"\",\"topic\":\"\",\"payload\":\"{\\\"action\\\":\\\"start\\\"}\",\"payloadType\":\"str\",\"repeat\":\"\",\"crontab\":\"\",\"once\":false,\"onceDelay\":0.1,\"x\":120,\"y\":200,\"wires\":[[\"82184aa9.f5d478\"]]},{\"id\":\"6d575f16.77f38\",\"type\":\"inject\",\"z\":\"38b53284.e0e7ce\",\"name\":\"\",\"topic\":\"\",\"payload\":\"{\\\"action\\\":\\\"stop\\\"}\",\"payloadType\":\"str\",\"repeat\":\"\",\"crontab\":\"\",\"once\":false,\"onceDelay\":0.1,\"x\":120,\"y\":240,\"wires\":[[\"82184aa9.f5d478\"]]},{\"id\":\"33e6f109.d3fa3e\",\"type\":\"change\",\"z\":\"38b53284.e0e7ce\",\"name\":\"\",\"rules\":[{\"t\":\"delete\",\"p\":\"_session\",\"pt\":\"msg\"},{\"t\":\"set\",\"p\":\"payload.time\",\"pt\":\"msg\",\"to\":\"\",\"tot\":\"date\"}],\"action\":\"\",\"property\":\"\",\"from\":\"\",\"to\":\"\",\"reg\":false,\"x\":400,\"y\":740,\"wires\":[[\"ad023fd.c02f3c\"]]},{\"id\":\"d6b2be88.fc729\",\"type\":\"msg-speed\",\"z\":\"38b53284.e0e7ce\",\"name\":\"\",\"frequency\":\"sec\",\"estimation\":false,\"ignore\":true,\"x\":310,\"y\":620,\"wires\":[[],[\"e01492d4.873f9\"]]},{\"id\":\"ad023fd.c02f3c\",\"type\":\"function\",\"z\":\"38b53284.e0e7ce\",\"name\":\"\",\"func\":\"length = {}\\nlength.payload = msg.payload.length/1024\\nreturn [msg,length];\",\"outputs\":2,\"noerr\":0,\"x\":550,\"y\":740,\"wires\":[[\"d6b2be88.fc729\"],[\"689e5c0b.e48504\"]]},{\"id\":\"689e5c0b.e48504\",\"type\":\"debug\",\"z\":\"38b53284.e0e7ce\",\"name\":\"\",\"active\":true,\"tosidebar\":false,\"console\":false,\"tostatus\":true,\"complete\":\"payload\",\"x\":110,\"y\":620,\"wires\":[]},{\"id\":\"22ecfb4d.5b5704\",\"type\":\"inject\",\"z\":\"38b53284.e0e7ce\",\"name\":\"High Quality\",\"topic\":\"\",\"payload\":\"{\\\"action\\\":\\\"quality\\\",\\\"value\\\":\\\"50\\\"}\",\"payloadType\":\"str\",\"repeat\":\"\",\"crontab\":\"\",\"once\":false,\"onceDelay\":0.1,\"x\":110,\"y\":300,\"wires\":[[\"82184aa9.f5d478\"]]},{\"id\":\"e7072ef5.7677c\",\"type\":\"inject\",\"z\":\"38b53284.e0e7ce\",\"name\":\"Mid Quality\",\"topic\":\"\",\"payload\":\"{\\\"action\\\":\\\"quality\\\",\\\"value\\\":\\\"20\\\"}\",\"payloadType\":\"str\",\"repeat\":\"\",\"crontab\":\"\",\"once\":false,\"onceDelay\":0.1,\"x\":110,\"y\":340,\"wires\":[[\"82184aa9.f5d478\"]]},{\"id\":\"30886756.3a4608\",\"type\":\"inject\",\"z\":\"38b53284.e0e7ce\",\"name\":\"Low Quality\",\"topic\":\"\",\"payload\":\"{\\\"action\\\":\\\"quality\\\",\\\"value\\\":\\\"10\\\"}\",\"payloadType\":\"str\",\"repeat\":\"\",\"crontab\":\"\",\"once\":false,\"onceDelay\":0.1,\"x\":110,\"y\":380,\"wires\":[[\"82184aa9.f5d478\"]]},{\"id\":\"99ca9d14.0b8d8\",\"type\":\"inject\",\"z\":\"38b53284.e0e7ce\",\"name\":\"25 FPS\",\"topic\":\"\",\"payload\":\"{\\\"action\\\":\\\"fps\\\",\\\"value\\\":\\\"0.04\\\"}\",\"payloadType\":\"str\",\"repeat\":\"\",\"crontab\":\"\",\"once\":false,\"onceDelay\":0.1,\"x\":250,\"y\":440,\"wires\":[[\"82184aa9.f5d478\"]]},{\"id\":\"634a291c.dae078\",\"type\":\"inject\",\"z\":\"38b53284.e0e7ce\",\"name\":\"10 FPS\",\"topic\":\"\",\"payload\":\"{\\\"action\\\":\\\"fps\\\",\\\"value\\\":\\\"0.1\\\"}\",\"payloadType\":\"str\",\"repeat\":\"\",\"crontab\":\"\",\"once\":false,\"onceDelay\":0.1,\"x\":90,\"y\":480,\"wires\":[[\"82184aa9.f5d478\"]]},{\"id\":\"c55acd4.775aa3\",\"type\":\"inject\",\"z\":\"38b53284.e0e7ce\",\"name\":\"20 FPS\",\"topic\":\"\",\"payload\":\"{\\\"action\\\":\\\"fps\\\",\\\"value\\\":\\\"0.05\\\"}\",\"payloadType\":\"str\",\"repeat\":\"\",\"crontab\":\"\",\"once\":false,\"onceDelay\":0.1,\"x\":410,\"y\":440,\"wires\":[[\"82184aa9.f5d478\"]]},{\"id\":\"5c365190.24db7\",\"type\":\"inject\",\"z\":\"38b53284.e0e7ce\",\"name\":\"5 FPS\",\"topic\":\"\",\"payload\":\"{\\\"action\\\":\\\"fps\\\",\\\"value\\\":\\\"0.2\\\"}\",\"payloadType\":\"str\",\"repeat\":\"\",\"crontab\":\"\",\"once\":false,\"onceDelay\":0.1,\"x\":250,\"y\":480,\"wires\":[[\"82184aa9.f5d478\"]]},{\"id\":\"17252d35.8b5803\",\"type\":\"inject\",\"z\":\"38b53284.e0e7ce\",\"name\":\"30 FPS\",\"topic\":\"\",\"payload\":\"{\\\"action\\\":\\\"fps\\\",\\\"value\\\":\\\"0.033\\\"}\",\"payloadType\":\"str\",\"repeat\":\"\",\"crontab\":\"\",\"once\":false,\"onceDelay\":0.1,\"x\":90,\"y\":440,\"wires\":[[\"82184aa9.f5d478\"]]},{\"id\":\"299cc743.334978\",\"type\":\"inject\",\"z\":\"38b53284.e0e7ce\",\"name\":\"No Limit FPS\",\"topic\":\"\",\"payload\":\"{\\\"action\\\":\\\"fps\\\",\\\"value\\\":\\\"0\\\"}\",\"payloadType\":\"str\",\"repeat\":\"\",\"crontab\":\"\",\"once\":false,\"onceDelay\":0.1,\"x\":430,\"y\":480,\"wires\":[[]]},{\"id\":\"cff82ac.2c281d8\",\"type\":\"inject\",\"z\":\"38b53284.e0e7ce\",\"name\":\"%2\",\"topic\":\"\",\"payload\":\"{\\\"action\\\":\\\"modulo\\\",\\\"value\\\":\\\"2\\\"}\",\"payloadType\":\"str\",\"repeat\":\"\",\"crontab\":\"\",\"once\":false,\"onceDelay\":0.1,\"x\":90,\"y\":540,\"wires\":[[\"82184aa9.f5d478\"]]},{\"id\":\"551e0b63.80a7b4\",\"type\":\"inject\",\"z\":\"38b53284.e0e7ce\",\"name\":\"%5\",\"topic\":\"\",\"payload\":\"{\\\"action\\\":\\\"modulo\\\",\\\"value\\\":\\\"5\\\"}\",\"payloadType\":\"str\",\"repeat\":\"\",\"crontab\":\"\",\"once\":false,\"onceDelay\":0.1,\"x\":250,\"y\":540,\"wires\":[[\"82184aa9.f5d478\"]]},{\"id\":\"55b4770c.4a4848\",\"type\":\"inject\",\"z\":\"38b53284.e0e7ce\",\"name\":\"%10\",\"topic\":\"\",\"payload\":\"{\\\"action\\\":\\\"modulo\\\",\\\"value\\\":\\\"10\\\"}\",\"payloadType\":\"str\",\"repeat\":\"\",\"crontab\":\"\",\"once\":false,\"onceDelay\":0.1,\"x\":410,\"y\":540,\"wires\":[[\"82184aa9.f5d478\"]]},{\"id\":\"cba584ec.2644e8\",\"type\":\"inject\",\"z\":\"38b53284.e0e7ce\",\"name\":\"%20\",\"topic\":\"\",\"payload\":\"{\\\"action\\\":\\\"modulo\\\",\\\"value\\\":\\\"20\\\"}\",\"payloadType\":\"str\",\"repeat\":\"\",\"crontab\":\"\",\"once\":false,\"onceDelay\":0.1,\"x\":90,\"y\":580,\"wires\":[[\"82184aa9.f5d478\"]]},{\"id\":\"8a9d0776.f601f8\",\"type\":\"inject\",\"z\":\"38b53284.e0e7ce\",\"name\":\"%1000\",\"topic\":\"\",\"payload\":\"{\\\"action\\\":\\\"modulo\\\",\\\"value\\\":\\\"1000\\\"}\",\"payloadType\":\"str\",\"repeat\":\"\",\"crontab\":\"\",\"once\":false,\"onceDelay\":0.1,\"x\":250,\"y\":580,\"wires\":[[\"82184aa9.f5d478\"]]},{\"id\":\"dd28a9.caf62758\",\"type\":\"mongodb2 in\",\"z\":\"38b53284.e0e7ce\",\"service\":\"_ext_\",\"configNode\":\"2049da8a.1a9536\",\"name\":\"Visitors\",\"collection\":\"visitor\",\"operation\":\"insertOne\",\"x\":980,\"y\":220,\"wires\":[[\"76e5920a.9f330c\"]]},{\"id\":\"ceb62afc.7ef708\",\"type\":\"inject\",\"z\":\"38b53284.e0e7ce\",\"name\":\"mjpeg on\",\"topic\":\"\",\"payload\":\"{\\\"action\\\":\\\"mjpeg\\\",\\\"value\\\":1}\",\"payloadType\":\"str\",\"repeat\":\"\",\"crontab\":\"\",\"once\":false,\"onceDelay\":0.1,\"x\":280,\"y\":60,\"wires\":[[\"82184aa9.f5d478\"]]},{\"id\":\"f3d45960.02ced8\",\"type\":\"inject\",\"z\":\"38b53284.e0e7ce\",\"name\":\"mjpeg off\",\"topic\":\"\",\"payload\":\"{\\\"action\\\":\\\"mjpeg\\\",\\\"value\\\":0}\",\"payloadType\":\"str\",\"repeat\":\"\",\"crontab\":\"\",\"once\":false,\"onceDelay\":0.1,\"x\":280,\"y\":100,\"wires\":[[\"82184aa9.f5d478\"]]},{\"id\":\"d037383d.e5af38\",\"type\":\"mongodb2 in\",\"z\":\"38b53284.e0e7ce\",\"service\":\"_ext_\",\"configNode\":\"2049da8a.1a9536\",\"name\":\"Cameras\",\"collection\":\"camera\",\"operation\":\"insertOne\",\"x\":980,\"y\":280,\"wires\":[[\"76e5920a.9f330c\"]]},{\"id\":\"67285ec1.29a4f\",\"type\":\"websocket-listener\",\"z\":\"\",\"path\":\"/control\",\"wholemsg\":\"false\"},{\"id\":\"6d7bdba0.178454\",\"type\":\"websocket-listener\",\"z\":\"\",\"path\":\"/feed2\",\"wholemsg\":\"false\"},{\"id\":\"b5eec0d5.b0e2a\",\"type\":\"websocket-listener\",\"z\":\"\",\"path\":\"/feed_out\",\"wholemsg\":\"true\"},{\"id\":\"2049da8a.1a9536\",\"type\":\"mongodb2\",\"z\":\"\",\"uri\":\"mongodb://localhost:27017/myfacerecognitiondb\",\"name\":\"mongo ex1\",\"options\":\"\",\"parallelism\":\"-1\"}]",
+			"file": "src/camera.py",
 			"settings":
 			{
-				"buffer_size": 8781,
-				"line_ending": "Unix",
-				"name": "[{\"id\":\"82184aa9.f5d478\",\"type\":\"websocket out\",\"z"
-			}
-		},
-		{
-			"file": "/Users/admin/Downloads/dev/docker/docker-elk-master/docker-compose.yml",
-			"settings":
-			{
-				"buffer_size": 875,
+				"buffer_size": 27817,
+				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "/Users/admin/Downloads/dev/map/maps/node_modules/loopback-connector-es/docker-compose.yml",
+			"contents": "{\n    \"AppArmorProfile\": \"\",\n    \"Args\": [\n        \"start\",\n        \"--\",\n        \"--userDir\",\n        \"/data\"\n    ],\n    \"Config\": {\n        \"ArgsEscaped\": true,\n        \"AttachStderr\": false,\n        \"AttachStdin\": false,\n        \"AttachStdout\": false,\n        \"Cmd\": [\n            \"npm\",\n            \"start\",\n            \"--\",\n            \"--userDir\",\n            \"/data\"\n        ],\n        \"Domainname\": \"\",\n        \"Entrypoint\": null,\n        \"Env\": [\n            \"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\",\n            \"NODE_VERSION=10.4.0\",\n            \"YARN_VERSION=1.7.0\",\n            \"FLOWS=flows.json\",\n            \"NODE_PATH=/usr/src/node-red/node_modules:/data/node_modules\"\n        ],\n        \"ExposedPorts\": {\n            \"1880/tcp\": {}\n        },\n        \"Hostname\": \"dd29fab90682\",\n        \"Image\": \"ex34-nodered\",\n        \"Labels\": {\n            \"com.docker.compose.config-hash\": \"d8189f796e146911f1e81f57a3e290a18256d52a169512bc585f45331942dc6f\",\n            \"com.docker.compose.container-number\": \"1\",\n            \"com.docker.compose.oneoff\": \"False\",\n            \"com.docker.compose.project\": \"py\",\n            \"com.docker.compose.service\": \"control\",\n            \"com.docker.compose.version\": \"1.21.1\"\n        },\n        \"OnBuild\": null,\n        \"OpenStdin\": false,\n        \"StdinOnce\": false,\n        \"Tty\": false,\n        \"User\": \"node-red\",\n        \"Volumes\": null,\n        \"WorkingDir\": \"/usr/src/node-red\"\n    },\n    \"Created\": \"2018-06-12T21:03:32.9532471Z\",\n    \"Driver\": \"overlay2\",\n    \"ExecIDs\": null,\n    \"GraphDriver\": {\n        \"Data\": {\n            \"LowerDir\": \"/var/lib/docker/overlay2/f53877b06b2399aa51dedcd5974999b797cbdf85c9f04a7ab8d657257f76f3ae-init/diff:/var/lib/docker/overlay2/e0e4a9e63000f0ff4552e6588541c5cdb88c0b7c3ef75ac337542c3f29cefe43/diff:/var/lib/docker/overlay2/abed0761755734b3a2651c05fb5f70b8f2befa4195c918995ff527632bb31220/diff:/var/lib/docker/overlay2/d497c3dddf8a168c2f3ce41c4a07689ed56fe908728516b31f00958c301152bb/diff:/var/lib/docker/overlay2/5f192d1da688b1004d81bbf6c05a4094740680e5a212c031f19b0b4c00a165d3/diff:/var/lib/docker/overlay2/9f46d94cd38defd96c6c92a0452ca7d03ebab18fa11a3b39304fb1595888b92f/diff:/var/lib/docker/overlay2/27481100c6a1741cc856520343570ad3fc0cb5215d222d3ccfd619ddab129395/diff:/var/lib/docker/overlay2/4e5fb0a316816c82fd6beaaad7674f1ee39bddb5e64207d3a2c48f0026eed5ea/diff:/var/lib/docker/overlay2/bfaf4feec94784de2ace633fe952a06440d6ed34aeb70c3ed6513b5f27b8c797/diff:/var/lib/docker/overlay2/c29839f80db2a7a551ef264721975128fa662f98aa510063cbd5bf8af00ff351/diff:/var/lib/docker/overlay2/26e1f556d1f45488bef68f2d0df6e4d02b9e156f15e559aa25e12cec22e36eb9/diff:/var/lib/docker/overlay2/88c5eb76c37ea95dd122a7b1d277c5d3e8ced819d1ee5925add4e6783054e23f/diff:/var/lib/docker/overlay2/e0d0a5bb4ef6acaaa04fa1d0c0b92bf3160b74737b4f2b4b6fc842c60d5eed67/diff:/var/lib/docker/overlay2/ee4fbee2178d0b2c087c050631f07f5fa86695aa58bec0cd86c850a0c3ec0510/diff:/var/lib/docker/overlay2/9d4a5d10691206f4c97bb2e49be34cfc83d2ad51985f45ce4ec6696cde6afd72/diff\",\n            \"MergedDir\": \"/var/lib/docker/overlay2/f53877b06b2399aa51dedcd5974999b797cbdf85c9f04a7ab8d657257f76f3ae/merged\",\n            \"UpperDir\": \"/var/lib/docker/overlay2/f53877b06b2399aa51dedcd5974999b797cbdf85c9f04a7ab8d657257f76f3ae/diff\",\n            \"WorkDir\": \"/var/lib/docker/overlay2/f53877b06b2399aa51dedcd5974999b797cbdf85c9f04a7ab8d657257f76f3ae/work\"\n        },\n        \"Name\": \"overlay2\"\n    },\n    \"HostConfig\": {\n        \"AutoRemove\": false,\n        \"Binds\": [],\n        \"BlkioDeviceReadBps\": null,\n        \"BlkioDeviceReadIOps\": null,\n        \"BlkioDeviceWriteBps\": null,\n        \"BlkioDeviceWriteIOps\": null,\n        \"BlkioWeight\": 0,\n        \"BlkioWeightDevice\": null,\n        \"CapAdd\": null,\n        \"CapDrop\": null,\n        \"Cgroup\": \"\",\n        \"CgroupParent\": \"\",\n        \"ConsoleSize\": [\n            0,\n            0\n        ],\n        \"ContainerIDFile\": \"\",\n        \"CpuCount\": 0,\n        \"CpuPercent\": 0,\n        \"CpuPeriod\": 0,\n        \"CpuQuota\": 0,\n        \"CpuRealtimePeriod\": 0,\n        \"CpuRealtimeRuntime\": 0,\n        \"CpuShares\": 0,\n        \"CpusetCpus\": \"\",\n        \"CpusetMems\": \"\",\n        \"DeviceCgroupRules\": null,\n        \"Devices\": null,\n        \"DiskQuota\": 0,\n        \"Dns\": null,\n        \"DnsOptions\": null,\n        \"DnsSearch\": null,\n        \"ExtraHosts\": [\n            \"db:172.10.0.201\"\n        ],\n        \"GroupAdd\": null,\n        \"IOMaximumBandwidth\": 0,\n        \"IOMaximumIOps\": 0,\n        \"IpcMode\": \"shareable\",\n        \"Isolation\": \"\",\n        \"KernelMemory\": 0,\n        \"Links\": null,\n        \"LogConfig\": {\n            \"Config\": {},\n            \"Type\": \"json-file\"\n        },\n        \"Memory\": 0,\n        \"MemoryReservation\": 0,\n        \"MemorySwap\": 0,\n        \"MemorySwappiness\": null,\n        \"NanoCpus\": 0,\n        \"NetworkMode\": \"py_backend\",\n        \"OomKillDisable\": false,\n        \"OomScoreAdj\": 0,\n        \"PidMode\": \"\",\n        \"PidsLimit\": 0,\n        \"PortBindings\": {\n            \"1880/tcp\": [\n                {\n                    \"HostIp\": \"\",\n                    \"HostPort\": \"1880\"\n                }\n            ]\n        },\n        \"Privileged\": false,\n        \"PublishAllPorts\": false,\n        \"ReadonlyRootfs\": false,\n        \"RestartPolicy\": {\n            \"MaximumRetryCount\": 0,\n            \"Name\": \"\"\n        },\n        \"Runtime\": \"runc\",\n        \"SecurityOpt\": null,\n        \"ShmSize\": 67108864,\n        \"UTSMode\": \"\",\n        \"Ulimits\": null,\n        \"UsernsMode\": \"\",\n        \"VolumeDriver\": \"\",\n        \"VolumesFrom\": []\n    },\n    \"HostnamePath\": \"/var/lib/docker/containers/dd29fab90682f2579a9923be782651886dafad6bb89def4ce97e0ff5f578a983/hostname\",\n    \"HostsPath\": \"/var/lib/docker/containers/dd29fab90682f2579a9923be782651886dafad6bb89def4ce97e0ff5f578a983/hosts\",\n    \"Id\": \"dd29fab90682f2579a9923be782651886dafad6bb89def4ce97e0ff5f578a983\",\n    \"Image\": \"sha256:69ec6d543425c39500fa02ffeefa9a515c57e69d2900b3b47123586ffbbc4788\",\n    \"LogPath\": \"/var/lib/docker/containers/dd29fab90682f2579a9923be782651886dafad6bb89def4ce97e0ff5f578a983/dd29fab90682f2579a9923be782651886dafad6bb89def4ce97e0ff5f578a983-json.log\",\n    \"MountLabel\": \"\",\n    \"Mounts\": [],\n    \"Name\": \"/py_control_1\",\n    \"NetworkSettings\": {\n        \"Bridge\": \"\",\n        \"EndpointID\": \"\",\n        \"Gateway\": \"\",\n        \"GlobalIPv6Address\": \"\",\n        \"GlobalIPv6PrefixLen\": 0,\n        \"HairpinMode\": false,\n        \"IPAddress\": \"\",\n        \"IPPrefixLen\": 0,\n        \"IPv6Gateway\": \"\",\n        \"LinkLocalIPv6Address\": \"\",\n        \"LinkLocalIPv6PrefixLen\": 0,\n        \"MacAddress\": \"\",\n        \"Networks\": {\n            \"py_backend\": {\n                \"Aliases\": [\n                    \"dd29fab90682\",\n                    \"control\"\n                ],\n                \"DriverOpts\": null,\n                \"EndpointID\": \"\",\n                \"Gateway\": \"\",\n                \"GlobalIPv6Address\": \"\",\n                \"GlobalIPv6PrefixLen\": 0,\n                \"IPAMConfig\": {\n                    \"IPv4Address\": \"172.10.0.200\"\n                },\n                \"IPAddress\": \"\",\n                \"IPPrefixLen\": 0,\n                \"IPv6Gateway\": \"\",\n                \"Links\": null,\n                \"MacAddress\": \"\",\n                \"NetworkID\": \"c0dc85acb3b8d49071a8664e9bbe728710ca910c4b99e32a02c2e713d796352a\"\n            }\n        },\n        \"Ports\": {},\n        \"SandboxID\": \"c13976ef8b66656deddcac0f0df2017336b530f39264c6e83a5889e4be43f0b7\",\n        \"SandboxKey\": \"/var/run/docker/netns/c13976ef8b66\",\n        \"SecondaryIPAddresses\": null,\n        \"SecondaryIPv6Addresses\": null\n    },\n    \"Path\": \"npm\",\n    \"Platform\": \"linux\",\n    \"ProcessLabel\": \"\",\n    \"ResolvConfPath\": \"/var/lib/docker/containers/dd29fab90682f2579a9923be782651886dafad6bb89def4ce97e0ff5f578a983/resolv.conf\",\n    \"RestartCount\": 0,\n    \"State\": {\n        \"Dead\": false,\n        \"Error\": \"\",\n        \"ExitCode\": 0,\n        \"FinishedAt\": \"2018-06-12T21:13:44.0831168Z\",\n        \"OOMKilled\": false,\n        \"Paused\": false,\n        \"Pid\": 0,\n        \"Restarting\": false,\n        \"Running\": false,\n        \"StartedAt\": \"2018-06-12T21:12:06.2885338Z\",\n        \"Status\": \"exited\"\n    }\n}",
 			"settings":
 			{
-				"buffer_size": 458,
+				"buffer_size": 8156,
 				"line_ending": "Unix"
 			}
 		},
@@ -108,15 +94,6 @@
 			"settings":
 			{
 				"buffer_size": 26593,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/requirements.txt",
-			"settings":
-			{
-				"buffer_size": 85,
-				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
@@ -156,6 +133,10 @@
 		"last_filter": "",
 		"selected_items":
 		[
+			[
+				"json",
+				"Indent JSON"
+			],
 			[
 				"in",
 				"Package Control: Install Package"
@@ -231,6 +212,14 @@
 	"file_history":
 	[
 		"/Users/admin/Downloads/dev/py/Dockerfile",
+		"/Users/admin/Downloads/lynda/web/Big Data/DevOps Foundations- Continuous Delivery,Continuous Integration/Ex_Files_DevOps_Continuous_Delivery_Integration/Exercise Files/Course Environments/docker-compose.yml",
+		"/Users/admin/Downloads/dev/py/src/requirements.txt",
+		"/Users/admin/Downloads/dev/map/maps/node_modules/loopback-connector-es/docker-compose.yml",
+		"/Users/admin/Downloads/dev/docker/docker-elk-master/docker-compose.yml",
+		"/Users/admin/Downloads/x.diff.txt",
+		"/Users/admin/Downloads/dev/py/docker-compose.yml",
+		"/Users/admin/Downloads/dev/py/src/cli.py",
+		"/Users/admin/Downloads/dev/py/src/camera.py",
 		"/Users/admin/Downloads/dev/py/py.sublime-project",
 		"/Users/admin/Downloads/dev/py/.gitignore",
 		"/Users/admin/Downloads/dev/py/test.py",
@@ -262,7 +251,7 @@
 	],
 	"find":
 	{
-		"height": 48.0
+		"height": 23.0
 	},
 	"find_in_files":
 	{
@@ -277,6 +266,20 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"hostname",
+			"hostnamecamera",
+			"hostname",
+			"value",
+			"_capture",
+			"know",
+			"32",
+			"feed",
+			"1880",
+			"188",
+			"1881",
+			"1880",
+			"json",
+			"ws:",
 			"py",
 			" \n",
 			"send",
@@ -390,21 +393,7 @@
 			"upeo",
 			"face_re",
 			"webso",
-			"_text",
-			"testhandle",
-			"image",
-			"img_str",
-			"gimage",
-			"score",
-			"gimage",
-			"overlay",
-			"gimage",
-			"quality",
-			"response",
-			"awa",
-			"await",
-			"unex",
-			"video_size"
+			"_text"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -457,47 +446,381 @@
 			[
 				{
 					"buffer": 0,
-					"file": "src/camera.py",
+					"file": "docker-compose.yml",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 27105,
+						"buffer_size": 1372,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								21383,
-								21383
+								1224,
+								1224
 							]
 						],
 						"settings":
 						{
-							"SL.110.region_keys":
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.clone": -1,
+							"bracket_highlighter.clone_locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.clone_regions":
 							[
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content"
 							],
-							"SL.126.region_keys":
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
 							[
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content"
 							],
-							"SL.13.region_keys":
+							"git_gutter_is_enabled": true,
+							"git_savvy.repo_path": "/Users/admin/Downloads/dev/py",
+							"syntax": "Packages/zzz A File Icon zzz/aliases/YAML (Docker).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "Dockerfile",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 711,
+						"regions":
+						{
+						},
+						"selection":
+						[
 							[
-							],
-							"SL.178.region_keys":
+								530,
+								530
+							]
+						],
+						"settings":
+						{
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.clone": -1,
+							"bracket_highlighter.clone_locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.clone_regions":
 							[
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content"
 							],
-							"SL.196.region_keys":
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
 							[
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content"
 							],
-							"SL.273.region_keys":
+							"git_gutter_is_enabled": true,
+							"git_savvy.repo_path": "/Users/admin/Downloads/dev/py",
+							"syntax": "Packages/Dockerfile Syntax Highlighting/Syntaxes/Dockerfile.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "src/camera.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 27817,
+						"regions":
+						{
+						},
+						"selection":
+						[
 							[
-							],
-							"SL.61.region_keys":
-							[
-							],
-							"SL.78.region_keys":
-							[
-							],
+								21812,
+								21812
+							]
+						],
+						"settings":
+						{
 							"auto_complete": false,
 							"bracket_highlighter.busy": false,
 							"bracket_highlighter.clone": -1,
@@ -505,27 +828,12 @@
 							{
 								"close":
 								{
-									"1":
-									[
-										22436,
-										22437
-									]
 								},
 								"icon":
 								{
-									"1":
-									[
-										"Packages/BracketHighlighter/icons/square_bracket.png",
-										"region.bluish"
-									]
 								},
 								"open":
 								{
-									"1":
-									[
-										22431,
-										22432
-									]
 								},
 								"unmatched":
 								{
@@ -595,8 +903,8 @@
 								{
 									"1":
 									[
-										21383,
-										21384
+										21811,
+										21812
 									]
 								},
 								"icon":
@@ -611,8 +919,8 @@
 								{
 									"1":
 									[
-										21381,
-										21382
+										21788,
+										21789
 									]
 								},
 								"unmatched":
@@ -679,399 +987,35 @@
 							],
 							"git_gutter_is_enabled": true,
 							"git_savvy.repo_path": "/Users/admin/Downloads/dev/py",
-							"intellitip_row": 30,
-							"syntax": "Packages/Python/Python.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 122.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "src/cli.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2968,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1034,
-								1034
-							]
-						],
-						"settings":
-						{
-							"SL.14.region_keys":
-							[
-							],
-							"auto_complete": false,
-							"bracket_highlighter.busy": false,
-							"bracket_highlighter.clone": -1,
-							"bracket_highlighter.clone_locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.clone_regions":
-							[
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content"
-							],
-							"bracket_highlighter.locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.regions":
-							[
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content"
-							],
-							"git_gutter_is_enabled": true,
-							"git_savvy.repo_path": "/Users/admin/Downloads/dev/py",
 							"syntax": "Packages/Python/Python.sublime-syntax",
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 10563.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 2,
 					"type": "text"
 				},
 				{
-					"buffer": 2,
-					"file": "docker-compose.yml",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 803,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								364,
-								364
-							]
-						],
-						"settings":
-						{
-							"bracket_highlighter.busy": false,
-							"bracket_highlighter.clone": -1,
-							"bracket_highlighter.clone_locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.clone_regions":
-							[
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content"
-							],
-							"bracket_highlighter.locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.regions":
-							[
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content"
-							],
-							"git_gutter_is_enabled": true,
-							"git_savvy.repo_path": "/Users/admin/Downloads/dev/py",
-							"syntax": "Packages/zzz A File Icon zzz/aliases/YAML (Docker).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
 					"buffer": 3,
-					"file": "/Users/admin/Downloads/lynda/web/Big Data/DevOps Foundations- Continuous Delivery,Continuous Integration/Ex_Files_DevOps_Continuous_Delivery_Integration/Exercise Files/Course Environments/docker-compose.yml",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 877,
+						"buffer_size": 8156,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								717,
-								771
+								6231,
+								6246
 							]
 						],
 						"settings":
 						{
+							"auto_complete": true,
 							"bracket_highlighter.busy": false,
 							"bracket_highlighter.clone": -1,
 							"bracket_highlighter.clone_locations":
@@ -1087,6 +1031,11 @@
 								},
 								"unmatched":
 								{
+									"1":
+									[
+										4990,
+										4991
+									]
 								}
 							},
 							"bracket_highlighter.clone_regions":
@@ -1151,191 +1100,27 @@
 							{
 								"close":
 								{
+									"1":
+									[
+										6246,
+										6247
+									]
 								},
 								"icon":
 								{
+									"1":
+									[
+										"Packages/BracketHighlighter/icons/double_quote.png",
+										"region.greenish"
+									]
 								},
 								"open":
 								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.regions":
-							[
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content"
-							],
-							"git_gutter_is_enabled": false,
-							"syntax": "Packages/zzz A File Icon zzz/aliases/YAML (Docker).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 8781,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								8781,
-								8781
-							]
-						],
-						"settings":
-						{
-							"auto_name": "[{\"id\":\"82184aa9.f5d478\",\"type\":\"websocket out\",\"z",
-							"bracket_highlighter.busy": false,
-							"bracket_highlighter.clone": 490,
-							"bracket_highlighter.clone_locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.clone_regions":
-							[
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content"
-							],
-							"bracket_highlighter.locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
+									"1":
+									[
+										6230,
+										6231
+									]
 								},
 								"unmatched":
 								{
@@ -1401,9 +1186,11 @@
 							],
 							"default_dir": "/Users/admin/Downloads/dev/py/src",
 							"git_gutter_is_enabled": false,
-							"syntax": "Packages/Text/Plain text.tmLanguage"
+							"syntax": "Packages/JavaScript/JSON.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
 						},
-						"translation.x": 0.0,
+						"translation.x": 2.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
@@ -1411,220 +1198,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 5,
-					"file": "/Users/admin/Downloads/dev/docker/docker-elk-master/docker-compose.yml",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 875,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								321,
-								321
-							]
-						],
-						"settings":
-						{
-							"bracket_highlighter.busy": false,
-							"bracket_highlighter.clone": -1,
-							"bracket_highlighter.locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.regions":
-							[
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content"
-							],
-							"git_gutter_is_enabled": false,
-							"syntax": "Packages/zzz A File Icon zzz/aliases/YAML (Docker).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "/Users/admin/Downloads/dev/map/maps/node_modules/loopback-connector-es/docker-compose.yml",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 458,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								458,
-								458
-							]
-						],
-						"settings":
-						{
-							"bracket_highlighter.busy": false,
-							"bracket_highlighter.clone": -1,
-							"bracket_highlighter.locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.regions":
-							[
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content"
-							],
-							"git_gutter_is_enabled": true,
-							"git_savvy.repo_path": "/Users/admin/Downloads/dev/map/maps",
-							"syntax": "Packages/zzz A File Icon zzz/aliases/YAML (Docker).sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
+					"buffer": 4,
 					"semi_transient": false,
 					"settings":
 					{
@@ -1803,195 +1377,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 9,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
-					"buffer": 8,
-					"file": "src/requirements.txt",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 85,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								85,
-								85
-							]
-						],
-						"settings":
-						{
-							"SL.16.region_keys":
-							[
-							],
-							"SL.68.region_keys":
-							[
-							],
-							"bracket_highlighter.busy": false,
-							"bracket_highlighter.clone": -1,
-							"bracket_highlighter.clone_locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.clone_regions":
-							[
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content"
-							],
-							"bracket_highlighter.locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.regions":
-							[
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content"
-							],
-							"git_gutter_is_enabled": true,
-							"git_savvy.repo_path": "/Users/admin/Downloads/dev/py",
-							"syntax": "Packages/Text/Plain text.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 7,
-					"type": "text"
-				},
-				{
-					"buffer": 9,
+					"buffer": 5,
 					"semi_transient": false,
 					"settings":
 					{
@@ -2185,11 +1575,11 @@
 						"translation.y": 2908.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 11,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
-					"buffer": 10,
+					"buffer": 6,
 					"semi_transient": false,
 					"settings":
 					{
@@ -2381,11 +1771,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 8,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
-					"buffer": 11,
+					"buffer": 7,
 					"semi_transient": false,
 					"settings":
 					{
@@ -2491,7 +1881,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 10,
+					"stack_index": 6,
 					"type": "text"
 				}
 			]
@@ -2544,7 +1934,7 @@
 	"project": "py.sublime-project",
 	"replace":
 	{
-		"height": 90.0
+		"height": 42.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -2568,7 +1958,7 @@
 		[
 			[
 				"",
-				"~/Downloads/dev/dash/dash.sublime-project"
+				"~/Desktop/face/face.sublime-project"
 			]
 		],
 		"width": 380.0

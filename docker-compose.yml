@@ -4,10 +4,13 @@ services:
     image: control:latest
     ports:
       - "1880:1880"
+    volumes:
+      - camera-data:/data
+    depends_on:
+     - db
     networks:
       backend:
         ipv4_address: 172.10.0.200
-
     extra_hosts:
       - "db:172.10.0.201"
   db:
@@ -40,10 +43,11 @@ services:
     image: camera-app
     volumes:
      - /var/run/docker.sock:/var/run/docker.sock:ro
+     - camera-data:/app/known:ro
     ports:
-    - "5000"
+     - "5000"
     expose:
-    - "5000"
+     - "5000"
     networks:
       backend:
     extra_hosts:
@@ -58,6 +62,7 @@ services:
   #     - /var/run/docker.sock:/tmp/docker.sock:ro
 volumes:
   mongo-data:
+  camera-data:
 networks:
   backend:
     driver: bridge

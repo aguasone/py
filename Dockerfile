@@ -18,11 +18,13 @@ RUN pip3 install -r /tmp/requirements.txt
 
 # set /app as working directory
 WORKDIR /app
-RUN mkdir -p /app/known
 
 # copy current directory to /app
 COPY ./src/ /app
 RUN rm -rf /app/.config
+
+RUN rm -rf /app/known
+RUN mkdir -p /app/known
 
 # run python script
 CMD ["python3", "camera.py"]
