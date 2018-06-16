@@ -121,6 +121,11 @@ def init():
 	#ffmpeg -re -i ../../sabnzbd/complete/shows/The.Big.Bang.Theory.S11E22.mkv -f mjpeg -q:v 20 -s 640x480 http://localhost:5000/feed
 	#ffmpeg -f avfoundation -framerate 30 -i "0" -f mpegts udp://192.168.1.26:9999
 	#rtsp://admin:admin123@190.218.5.228:554
+
+	#China:
+	#rtsp://DNA:DNA2017!@98.186.153.94:554
+
+
 	#TODO: add ffmpeg internally
 
 	feed['ffmpeg_feed'] = False
