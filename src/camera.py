@@ -71,7 +71,9 @@ def init():
 		fc['tolerance'] = 0.68
 		fc['show_distance'] = True
 		fc['prototxt'] = "deploy.prototxt.txt"
+		fc['prototxt_object'] = "MobileNetSSD_deploy.prototxt.txt"
 		fc['model'] = "res10_300x300_ssd_iter_140000.caffemodel"
+		fc['model_object'] = "MobileNetSSD_deploy.caffemodel"
 		fc['shape_predictor'] = "shape_predictor_68_face_landmarks.dat"
 		fc['confidence'] = 0.8
 		feed['feedURL'] = "rtsp://184.72.239.149/vod/mp4:BigBuckBunny_175k.mov"
@@ -89,7 +91,13 @@ def init():
 	except KeyError:
 		fc['port'] = 5000
 
-
+	# initialize the list of class labels MobileNet SSD was trained to
+	# detect, then generate a set of bounding box colors for each class
+	local['classes'] = ["background", "aeroplane", "bicycle", "bird", "boat",
+		"bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
+		"dog", "horse", "motorbike", "person", "pottedplant", "sheep",
+		"sofa", "train", "tvmonitor"]
+	local['colors'] = np.random.uniform(0, 255, size=(len(local['classes']), 3))
 
 	local['_capture'] = {}
 	local['shutdown'] = False
@@ -133,6 +141,7 @@ def init():
 	# load our serialized model from disk
 	logger.info("loading model...")
 	local['net'] = cv2.dnn.readNetFromCaffe(fc['prototxt'], fc['model'])
+	local['net_object'] = cv2.dnn.readNetFromCaffe(fc['prototxt_object'], fc['model_object'])
 
 	start_encoding = time.time()
 	local['face_recognition'] = Recon(local['known_people_folder'], fc['tolerance'], fc['show_distance'])
@@ -141,13 +150,14 @@ def init():
 	#Check if OpenCV is Optimized:
 	logger.info("CV2 Optimized: {}".format(cv2.useOptimized()))
 
-async def read_frame(_frames, _last_image, _count_unknown, _box, _text, _result):
+async def read_frame(_frames, _last_image, _count_unknown, _box, _box2, _text, _result, _idx, _length):
 	err = 0
 	check = 0
 	squares = 0
 	speed = 0
 	score = 0
 	_frames = _frames + 1
+	idx = 0
 
 	c_fps = FPS().start()
 	image = feed['_camera'].read()
@@ -164,6 +174,9 @@ async def read_frame(_frames, _last_image, _count_unknown, _box, _text, _result)
 	# 	err /= float(overlay.shape[0] * overlay.shape[1])
 	# 	#print (err)
 
+	# grab the frame dimensions and convert it to a blob
+	(h, w) = overlay.shape[:2]
+
 	if (_frames % feed['modulo'] == 0):
 
 		# Make copies of the frame for transparency processing
@@ -177,18 +190,23 @@ async def read_frame(_frames, _last_image, _count_unknown, _box, _text, _result)
 		#cv2.addWeighted(overlay, alpha, output, 1 - alpha, 0, output)
 
 		# grab the frame dimensions and convert it to a blob
-		(h, w) = overlay.shape[:2]
+		#(h, w) = overlay.shape[:2]
 
 		blob = cv2.dnn.blobFromImage(cv2.resize(overlay, (300, 300)), 1.0,
 			(300, 300), (104.0, 177.0, 123.0))
+		blob_obj = cv2.dnn.blobFromImage(cv2.resize(overlay, (300, 300)),
+		0.007843, (300, 300), 127.5)
+
 
 		# pass the blob through the network and obtain the detections and
 		# predictions
 		local['net'].setInput(blob)
 		detections = local['net'].forward()
-
+		local['net_object'].setInput(blob_obj)
+		detections_obj = local['net_object'].forward()
 
 		box = {}
+		box2 = {}
 		text = {}
 		result = {}
 		# loop over the detections
@@ -207,15 +225,19 @@ async def read_frame(_frames, _last_image, _count_unknown, _box, _text, _result)
 			squares = squares + 1
 			# compute the (x, y)-coordinates of the bounding box for the
 			# object
+
 			box[i] = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
 			(startX, startY, endX, endY) = box[i].astype("int")
 			(x1, y1, x2, y2) = box[i].astype("int")
 
 			# draw the bounding box of the face along with the associated
 			# probability
+			#
+
 			txt = "{:.2f}%".format(_confidence * 100)
 			text[i] = txt
 			y = startY - 10 if startY - 10 > 10 else startY + 10
+
 
 			#gray = cv2.cvtColor(overlay, cv2.COLOR_BGR2GRAY)
 			cropped = overlay[startY:endY, startX:endX]
@@ -371,7 +393,38 @@ async def read_frame(_frames, _last_image, _count_unknown, _box, _text, _result)
 			cv2.putText(local['gimage'], result[i], (x1 + r, endY),
 				cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, feed['thickness'])
 
+		_length = detections_obj.copy()
+		for i in np.arange(0, detections_obj.shape[2]):
+			# extract the confidence (i.e., probability) associated with
+			# the prediction
+			_confidence = detections_obj[0, 0, i, 2]
+
+			# filter out weak detections_obj by ensuring the `confidence` is
+			# greater than the minimum confidence
+			if _confidence > fc['confidence']:
+				# extract the index of the class label from the
+				# `detections_obj`, then compute the (x, y)-coordinates of
+				# the bounding box for the object
+				idx = int(detections_obj[0, 0, i, 1])
+				box2 = detections_obj[0, 0, i, 3:7] * np.array([w, h, w, h])
+				(startX, startY, endX, endY) = box2.astype("int")
+
+				# draw the prediction on the frame
+				label = "{}: {:.2f}%".format(local['classes'][idx],
+					_confidence * 100)
+				cv2.rectangle(overlay, (startX, startY), (endX, endY),
+					local['colors'][idx], 2)
+				cv2.rectangle(local['gimage'], (startX, startY), (endX, endY),
+					local['colors'][idx], 2)
+				y = startY - 15 if startY - 15 > 15 else startY + 15
+				cv2.putText(overlay, label, (startX, y),
+					cv2.FONT_HERSHEY_SIMPLEX, 0.5, local['colors'][idx], 2)
+				cv2.putText(local['gimage'], label, (startX, y),
+					cv2.FONT_HERSHEY_SIMPLEX, 0.5, local['colors'][idx], 2)
+
 		_box = box
+		_box2 = box2
+		_idx = idx
 		_text = text
 		_result = result
 		_last_image = overlay
@@ -388,6 +441,27 @@ async def read_frame(_frames, _last_image, _count_unknown, _box, _text, _result)
 		rslt, local['img_str'] = cv2.imencode('.jpg', overlay, encode_param)
 		overlay = cv2.imdecode(local['img_str'], 1)
 
+		box2 = _box2
+		idx = _idx
+		if len(_length) > 0:
+			for i in np.arange(0, _length.shape[2]):
+				idx = int(_length[0, 0, i, 1])
+				box2 = _length[0, 0, i, 3:7] * np.array([w, h, w, h])
+				(startX, startY, endX, endY) = box2.astype("int")
+
+				# draw the prediction on the frame
+				label = "{}".format(local['classes'][idx])
+					# ,_confidence * 100)
+				cv2.rectangle(overlay, (startX, startY), (endX, endY),
+					local['colors'][idx], 2)
+				cv2.rectangle(local['gimage'], (startX, startY), (endX, endY),
+					local['colors'][idx], 2)
+				y = startY - 15 if startY - 15 > 15 else startY + 15
+				cv2.putText(overlay, label, (startX, y),
+					cv2.FONT_HERSHEY_SIMPLEX, 0.5, local['colors'][idx], 2)
+				cv2.putText(local['gimage'], label, (startX, y),
+					cv2.FONT_HERSHEY_SIMPLEX, 0.5, local['colors'][idx], 2)
+
 		if len(_box) > 0:
 			box = _box
 			text = _text
@@ -396,6 +470,8 @@ async def read_frame(_frames, _last_image, _count_unknown, _box, _text, _result)
 			for i in range(0, len(box)):
 				(startX, startY, endX, endY) = box[i].astype("int")
 				(x1, y1, x2, y2) = box[i].astype("int")
+				# (startX, startY, endX, endY) = box.astype("int")
+				# (x1, y1, x2, y2) = box.astype("int")
 
 				if result[i].startswith( 'unknown' ):
 					color = feed['color_unknow']
@@ -505,7 +581,7 @@ async def read_frame(_frames, _last_image, _count_unknown, _box, _text, _result)
 
 	result, local['img_str'] = cv2.imencode('.jpg', overlay)
 
-	return _frames, _last_image, _count_unknown, _box, _text, _result
+	return _frames, _last_image, _count_unknown, _box, _box2, _text, _result, _idx, _length
 
 async def process_video():
 	try:
@@ -523,8 +599,11 @@ async def process_video():
 		_result = ""
 		count_unknown = 0
 		frames = 0
+		_idx = 0
+		_length = np.array([])
 
 		_box = np.array([])
+		_box2 = np.array([])
 
 		while not local['shutdown']:
 			end_timer = time.time()
@@ -537,7 +616,7 @@ async def process_video():
 							await local['face_recognition'].delete_unknown_names(el)
 				start_timer = time.time()
 
-			_frames, _last_image, _count_unknown, _box, _text, _result = await read_frame(_frames, _last_image, _count_unknown, _box, _text, _result)
+			_frames, _last_image, _count_unknown, _box, _box2, _text, _result, _idx, _length = await read_frame(_frames, _last_image, _count_unknown, _box, _box2, _text, _result, _idx, _length)
 
 			await asyncio.sleep(feed['number_fps_second'])
 
@@ -584,8 +663,11 @@ async def feedHandle(request):
 					'utf-8') + img_bytes + b'\r\n')
 	try:
 			while True:
-				result, image = cv2.imencode('.jpg', local['gimage'])
-				await write(image.tostring())
+				try:
+					result, image = cv2.imencode('.jpg', local['gimage'])
+					await write(image.tostring())
+				except:
+					pass
 				await asyncio.sleep(feed['number_fps_second'])
 	except asyncio.CancelledError:
 			logger.info("Stream closed by frontend.")
@@ -600,7 +682,7 @@ async def add(_id, photo, firstname, lastname, _oldName):
 	newName = _id + '.' + firstname + '_' + lastname
 	oldName = '0.' + _oldName
 	try:
-		with open("./known/camera"+_id+"."+ firstname+"_"+ lastname +".jpg", "wb") as fh:
+		with open("./known/camera/"+_id+"."+ firstname+"_"+ lastname +".jpg", "wb") as fh:
 			fh.write(base64.decodebytes(str.encode(photo)))
 	except:
 		pass

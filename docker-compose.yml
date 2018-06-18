@@ -1,6 +1,7 @@
 version: "3"
 services:
   control:
+    build: ../control
     image: control:latest
     ports:
       - "1880:1880"
@@ -29,6 +30,7 @@ services:
     #   ME_CONFIG_MONGODB_ADMINUSERNAME: root
     #   ME_CONFIG_MONGODB_ADMINPASSWORD: admin
   api:
+    build: ../gui34
     image: loopback-api
     ports:
       - "3001:3000"
@@ -40,6 +42,7 @@ services:
     depends_on:
      - db
   camera:
+    build: .
     image: camera-app
     volumes:
      - /var/run/docker.sock:/var/run/docker.sock:ro
