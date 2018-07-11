@@ -8,7 +8,7 @@ import time
 # TODO Remove deleted encodings
 
 class Recon():
-	def __init__(self, known_people_folder, tolerance=0.8, show_distance=True):
+	def __init__(self, known_people_folder, tolerance=0.6, show_distance=True):
 		self.tolerance = tolerance
 		self.show_distance = show_distance
 		self.known_people_folder =  known_people_folder
@@ -77,7 +77,7 @@ class Recon():
 
 		encodings = face_recognition.face_encodings(img)
 
-		if len(encodings) == 1:
+		if len(encodings) != 0:
 			self.known_names.append(name)
 			self.known_face_encodings.append(encodings[0])
 

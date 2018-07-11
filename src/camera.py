@@ -20,6 +20,7 @@ import time
 import numpy as np
 import imutils
 from imutils.video import WebcamVideoStream
+from imutils.video import FileVideoStream
 from imutils.face_utils import FaceAligner
 from imutils.face_utils import rect_to_bb
 from imutils.video import FPS
@@ -72,14 +73,17 @@ def init():
 	except:
 		#Face Recognition parameters
 		fc['tolerance'] = 0.68
-		fc['show_distance'] = True
+		fc['show_distance'] = False
 		fc['prototxt'] = "deploy.prototxt.txt"
 		fc['prototxt_object'] = "MobileNetSSD_deploy.prototxt.txt"
 		fc['model'] = "res10_300x300_ssd_iter_140000.caffemodel"
 		fc['model_object'] = "MobileNetSSD_deploy.caffemodel"
 		fc['shape_predictor'] = "shape_predictor_68_face_landmarks.dat"
-		fc['confidence'] = 0.8
-		local['feedURL'] = "rtsp://184.72.239.149/vod/mp4:BigBuckBunny_175k.mov"
+		fc['confidence'] = 0.25
+		local['feedURL'] = "rtsp://admin:admin123@190.218.236.232:555/cam/realmonitor?channel=15&subtype=0"
+		#local['feedURL'] = "rtsp://admin:admin@192.168.0.61:554/"
+		#local['feedURL'] = "/tmp/abc.mp4"
+		#local['feedURL'] = "/Users/admin/Downloads/abc3.mp4"
 		#local['feedURL'] = 0
 		fc['camera_name'] = fc['hostname']
 		fc['enableObjectDetection'] = False
@@ -99,14 +103,13 @@ def init():
 	except KeyError:
 		fc['port'] = 5000
 
-	print (fc)
+	logger.debug(fc)
 
 	# initialize the list of class labels MobileNet SSD was trained to
 	# detect, then generate a set of bounding box colors for each class
 	local['classes'] = ["background", "aeroplane", "bicycle", "bird", "boat",
 		"bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
-		"dog", "horse", "motorbike", "person", "pottedplant", "sheep",
-		"sofa", "train", "tvmonitor"]
+		"dog", "horse", "motorbike", "person"]
 	local['colors'] = np.random.uniform(0, 255, size=(len(local['classes']), 3))
 
 	local['capture'] = {}
@@ -114,18 +117,18 @@ def init():
 	local['shutdown'] = False
 	local['gimage'] = None
 	local['known_people_folder'] = 'known/camera'
-	local['timer'] = 600
+	local['timer'] = 2
 
 	local['modulo'] = 5
 	local['color_unknow'] = (0, 0, 255)
 	local['color_know'] = (162, 255, 0)
 	local['thickness'] = 2
-	local['number_fps_second'] = 1/25
+	local['number_fps_second'] = 1/1000
 	local['quality'] = 100
 	local['banner'] = "hello..."
 	local['color_banner'] = (0, 0, 255)
 
-	local['video_size'] = 600
+	local['video_size'] = 800
 	local['control'] = None
 	local['ffmpeg_feed'] = False
 
@@ -201,6 +204,7 @@ async def read_frame(image):
 		box_obj = {}
 		text = {}
 		result = {}
+
 		# loop over the detections
 		for i in range(0, detections.shape[2]):
 
@@ -210,8 +214,13 @@ async def read_frame(image):
 
 			# filter out weak detections by ensuring the `confidence` is
 			# greater than the minimum confidence
+			if (i == 0) and (_confidence >= fc['confidence']):
+				logger.debug("-----s -----")
+
 			if _confidence < fc['confidence']:
 				continue
+
+			logger.debug("detections: {}".format(_confidence))
 
 			# compute the (x, y)-coordinates of the bounding box for the object
 			box[i] = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
@@ -223,12 +232,13 @@ async def read_frame(image):
 			text[i] = txt
 			y = startY - 10 if startY - 10 > 10 else startY + 10
 
-			#gray = cv2.cvtColor(overlay, cv2.COLOR_BGR2GRAY)
+			#overlay = cv2.cvtColor(overlay, cv2.COLOR_BGR2GRAY)
 			cropped = overlay[startY:endY, startX:endX]
 
 			array = []
 			distances = []
 			array, distances = await local['face_recognition'].test_image(cropped)
+			#array = ['0.unknown']
 			logger.debug("array: {}".format(array))
 			result[i] = 'unknown'
 
@@ -280,7 +290,8 @@ async def read_frame(image):
 				#If Customer unknown
 				color = local['color_unknow']
 				add = await local['face_recognition'].unknown_people(cropped, '0.unknown'+str(local['unknown']), None)
-				if add == 1:
+				logger.debug("unknow: {}".format(add))
+				if add > 0:
 					if startY-50 < 0:
 							x1 = 0
 					else:
@@ -324,34 +335,34 @@ async def read_frame(image):
 			overlay = local['draw'].face(overlay, 10, 10, startX, y, endY, x1, x2, y1, y2, color, local['thickness'], text[i], result[i])
 
 		if fc['enableObjectDetection']:
-		  _length = detections_obj.copy()
-		  for i in np.arange(0, detections_obj.shape[2]):
-		    # extract the confidence (i.e., probability) associated with
-		    # the prediction
-		    _confidence = detections_obj[0, 0, i, 2]
+			_length = detections_obj.copy()
+			for i in np.arange(0, detections_obj.shape[2]):
+				# extract the confidence (i.e., probability) associated with
+				# the prediction
+				_confidence = detections_obj[0, 0, i, 2]
 
-		    # filter out weak detections_obj by ensuring the `confidence` is
-		    # greater than the minimum confidence
-		    if _confidence > fc['confidence']:
-		      # extract the index of the class label from the
-		      # `detections_obj`, then compute the (x, y)-coordinates of
-		      # the bounding box for the object
-		      idx = int(detections_obj[0, 0, i, 1])
-		      box_obj = detections_obj[0, 0, i, 3:7] * np.array([w, h, w, h])
-		      (startX, startY, endX, endY) = box_obj.astype("int")
+				# filter out weak detections_obj by ensuring the `confidence` is
+				# greater than the minimum confidence
+				if _confidence > fc['confidence']:
+					# extract the index of the class label from the
+					# `detections_obj`, then compute the (x, y)-coordinates of
+					# the bounding box for the object
+					idx = int(detections_obj[0, 0, i, 1])
+					box_obj = detections_obj[0, 0, i, 3:7] * np.array([w, h, w, h])
+					(startX, startY, endX, endY) = xbox_obj.astype("int")
 
-		      # draw the prediction on the frame
-		      label = "{}: {:.2f}%".format(local['classes'][idx],
-		        _confidence * 100)
-		      cv2.rectangle(overlay, (startX, startY), (endX, endY),
-		        local['colors'][idx], 2)
-		      cv2.rectangle(local['gimage'], (startX, startY), (endX, endY),
-		        local['colors'][idx], 2)
-		      y = startY - 15 if startY - 15 > 15 else startY + 15
-		      cv2.putText(overlay, label, (startX, y),
-		        cv2.FONT_HERSHEY_SIMPLEX, 0.5, local['colors'][idx], 2)
-		      cv2.putText(local['gimage'], label, (startX, y),
-		        cv2.FONT_HERSHEY_SIMPLEX, 0.5, local['colors'][idx], 2)
+					# draw the prediction on the frame
+					label = "{}: {:.2f}%".format(local['classes'][idx],
+						_confidence * 100)
+					cv2.rectangle(overlay, (startX, startY), (endX, endY),
+						local['colors'][idx], 2)
+					cv2.rectangle(local['gimage'], (startX, startY), (endX, endY),
+						local['colors'][idx], 2)
+					y = startY - 15 if startY - 15 > 15 else startY + 15
+					cv2.putText(overlay, label, (startX, y),
+						cv2.FONT_HERSHEY_SIMPLEX, 0.5, local['colors'][idx], 2)
+					cv2.putText(local['gimage'], label, (startX, y),
+						cv2.FONT_HERSHEY_SIMPLEX, 0.5, local['colors'][idx], 2)
 
 		local['box'] = box
 		local['text'] = text
@@ -384,6 +395,8 @@ async def process_video():
 
 	try:
 		local['_camera'] = WebcamVideoStream(src=local['feedURL']).start()
+		#local['_camera'] = VideoStream(local['feedURL']).start()
+		#local['_camera'] = cv2.VideoCapture(local['feedURL'])
 		await asyncio.sleep(2)
 	except Exception as ex:
 		template = "an exception of type {0} occurred. arguments:\n{1!r}"
@@ -404,6 +417,7 @@ async def process_video():
 			start_timer = time.time()
 
 		c_fps = FPS().start()
+		#grab, image = local['_camera'].read()
 		image = local['_camera'].read()
 
 		image = await read_frame(image)
@@ -415,6 +429,8 @@ async def process_video():
 
 		c_fps.update()
 		c_fps.stop()
+		#print (c_fps.elapsed())
+		#print (c_fps.fps())
 
 		await asyncio.sleep(local['number_fps_second'])
 
@@ -537,7 +553,7 @@ async def control(timer):
 									local['mjpegToggle'] = int(payload['value'])
 									if local['mjpegToggle'] == 1:
 										local['feed_task'] = asyncio.ensure_future(feedsocket())
-										local['mjpeg_task'] = asyncio.ensure_future(remoteFeedHandle())
+										#local['mjpeg_task'] = asyncio.ensure_future(remoteFeedHandle())
 									else:
 										local['mjpeg_task'].cancel()
 										await local['mjpeg_task']
@@ -545,7 +561,7 @@ async def control(timer):
 										await local['feedler']
 
 							elif payload['action'] == "size":
-								print (payload['id'], fc['hostname'])
+								logger.debug(payload['id'], fc['hostname'])
 								if payload['id'] == fc['hostname']:
 									local['video_size'] = int(payload['value'])
 
@@ -558,7 +574,8 @@ async def control(timer):
 									else:
 										local['feedURL'] = payload['url']
 									fc['feedURL'] = local['feedURL']
-									local['_camera'].stop()
+									#local['_camera'].stop()
+									#local['_camera'] = cv2.VideoCapture(local['feedURL'])
 									local['_camera'] = WebcamVideoStream(src=local['feedURL']).start()
 							elif msg.type == aiohttp.WSMsgType.CLOSED:
 								break
@@ -611,15 +628,18 @@ async def build_server(loop, address, port):
 		app.router.add_route('GET', '/', baseHandle)
 		#app.on_cleanup.append(cleanup_background_tasks)
 		#app.on_shutdown.append(on_shutdown)
-		logger.info("Web Server Started!!")
+		#logger.info("Web Server Started!!")
+		#sslcontext = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+		#sslcontext.load_cert_chain('./exception34.crt', './exception34.com.key')
+		#return await loop.create_server(app.make_handler(), address, port, ssl=sslcontext)
 		return await loop.create_server(app.make_handler(), address, port)
 
 if __name__ == '__main__':
 		init()
 		loop = asyncio.get_event_loop()
 		try:
-			asyncio.ensure_future(control(60))
-			asyncio.ensure_future(heartbeat(60))
+			asyncio.ensure_future(control(10))
+			asyncio.ensure_future(heartbeat(20))
 			local['feedler'] = asyncio.ensure_future(process_video())
 
 			loop.run_until_complete(build_server(loop, '0.0.0.0', 5000))
@@ -629,13 +649,13 @@ if __name__ == '__main__':
 			 local['shutdown'] = True
 		finally:
 			afile = open(r'./.config', 'wb')
-			print (fc)
+			logger.debug(fc)
 			pickle.dump(fc, afile)
 			afile.close()
 
 			logger.info("Shutting down {} tasks".format(len(asyncio.Task.all_tasks())))
 			for task in asyncio.Task.all_tasks():
-					print(f'Cancelling: {task}')
+					logger.debug(f'Cancelling: {task}')
 			for task in asyncio.Task.all_tasks():
 					task.cancel()
 					loop.run_until_complete(task)
@@ -643,5 +663,6 @@ if __name__ == '__main__':
 			loop.close()
 			logger.info("Shutting Down!")
 			sys.exit(1)
+
 
 
