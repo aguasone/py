@@ -540,7 +540,7 @@ async def control(timer):
 		logger.info('connecting to control center')
 		try:
 			async with aiohttp.ClientSession() as session:
-				async with session.ws_connect(f'ws://control:1880/control') as ws:
+				async with session.ws_connect(f'ws://control:1880/node-red/control') as ws:
 			#async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
 				#async with session.ws_connect(f'wss://exception34.com/control', heartbeat=2, receive_timeout=5) as ws:
 					local['control'] = ws
@@ -634,7 +634,7 @@ async def feedsocket(timer):
 		logger.info('connecting to control center')
 		try:
 			async with aiohttp.ClientSession() as session:
-				async with session.ws_connect(f'ws://control:1880/feed2') as ws:
+				async with session.ws_connect(f'ws://control:1880/node-red/feed2') as ws:
 			#async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
 				#async with session.ws_connect(f'wss://exception34.com/feed2', heartbeat=2, receive_timeout=5) as ws:
 					local['feed'] = ws
