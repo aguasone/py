@@ -3,10 +3,11 @@ services:
   control:
     build: ../control
     image: control:latest
+    user: root
     ports:
       - "1880:1880"
     volumes:
-      - camera-data:/data
+      - camera-data:/data:rw
       - /etc/timezone:/etc/timezone
       - /etc/localtime:/etc/localtime
     depends_on:

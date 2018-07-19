@@ -60,7 +60,7 @@ logger.setLevel(logging.DEBUG)
 fc = {}
 local = {}
 
-objgraph.show_most_common_types()
+logger.debug(objgraph.show_most_common_types())
 
 def init():
 	global fc
@@ -119,6 +119,7 @@ def init():
 		"bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
 		"dog", "horse", "motorbike", "person"]
 	local['colors'] = np.random.uniform(0, 255, size=(len(local['classes']), 3))
+
 
 	local['capture'] = {}
 	local['ws_msg'] = {}
@@ -444,9 +445,9 @@ async def process_video():
 		end_timer = time.time()
 		if (end_timer - start_timer) > local['timer']:
 			logger.debug("memory:")
-			objgraph.show_most_common_types()
+			logger.debug(objgraph.show_most_common_types())
 			logger.debug("growth:")
-			objgraph.show_growth()
+			logger.debug(objgraph.show_growth())
 			if local['capture']:
 				el = min(local['capture'])
 				error = local['capture'].pop(el, None)
@@ -681,6 +682,7 @@ async def build_server(loop, address, port):
 		#logger.info("Web Server Started!!")
 		sslcontext = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
 		sslcontext.load_cert_chain('./exception34.crt', './exception34.com.key')
+
 		return await loop.create_server(app.make_handler(), address, port, ssl=sslcontext)
 		#return await loop.create_server(app.make_handler(), address, port)
 
