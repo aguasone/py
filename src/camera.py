@@ -127,7 +127,7 @@ def init():
 	local['known_people_folder'] = 'known/camera'
 	local['timer'] = 20
 
-	local['modulo'] = 5
+	local['modulo'] = 1
 	local['color_unknow'] = (0, 0, 255)
 	local['color_know'] = (162, 255, 0)
 	local['thickness'] = 2

@@ -2,6 +2,7 @@ asyncio
 aiohttp
 numpy
 opencv-python
+objgraph
 dlib
 imutils
 scikit-image
