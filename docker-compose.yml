@@ -30,9 +30,24 @@ services:
         ipv4_address: 172.10.0.201
     extra_hosts:
       - "control:172.10.0.200"
-    # environment:
-    #   ME_CONFIG_MONGODB_ADMINUSERNAME: root
-    #   ME_CONFIG_MONGODB_ADMINPASSWORD: admin
+    #environment:
+       #ME_CONFIG_MONGODB_ADMINUSERNAME: root
+       #ME_CONFIG_MONGODB_ADMINPASSWORD: admin
+  mongo:
+    image: mongo-express
+    networks:
+      backend:
+        ipv4_address: 172.10.0.203
+    ports:
+      - "8081:8081"
+    link:
+     - db
+    depends_on:
+     - db
+    environment:
+        ME_CONFIG_SITE_BASEURL: /mongo
+        #ME_CONFIG_MONGODB_AUTH_USERNAME: root
+        #ME_CONFIG_MONGODB_AUTH_PASSWORD: admin
   api:
     build: ../gui34
     image: loopback-api
