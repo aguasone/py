@@ -539,10 +539,10 @@ async def control(timer):
 	while not local['shutdown']:
 		logger.info('connecting to control center')
 		try:
-			#async with aiohttp.ClientSession() as session:
-				#async with session.ws_connect(f'ws://control:1880/control') as ws:
-			async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
-				async with session.ws_connect(f'wss://exception34.com/control', heartbeat=2, receive_timeout=5) as ws:
+			async with aiohttp.ClientSession() as session:
+				async with session.ws_connect(f'ws://control:1880/control') as ws:
+			#async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
+				#async with session.ws_connect(f'wss://exception34.com/control', heartbeat=2, receive_timeout=5) as ws:
 					local['control'] = ws
 					logger.info ('control connected')
 					async for msg in ws:
@@ -633,10 +633,10 @@ async def feedsocket(timer):
 	while not local['shutdown']:
 		logger.info('connecting to control center')
 		try:
-			#async with aiohttp.ClientSession() as session:
-				#async with session.ws_connect(f'ws://control:1880/feed2') as ws:
-			async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
-				async with session.ws_connect(f'wss://exception34.com/feed2', heartbeat=2, receive_timeout=5) as ws:
+			async with aiohttp.ClientSession() as session:
+				async with session.ws_connect(f'ws://control:1880/feed2') as ws:
+			#async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
+				#async with session.ws_connect(f'wss://exception34.com/feed2', heartbeat=2, receive_timeout=5) as ws:
 					local['feed'] = ws
 					logger.info ('feed connected')
 					async for msg in ws:
