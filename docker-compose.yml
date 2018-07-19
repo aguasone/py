@@ -7,8 +7,8 @@ services:
       - "1880:1880"
     volumes:
       - camera-data:/data
-      #- /etc/timezone:/etc/timezone
-      #- /etc/localtime:/etc/localtime
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
     depends_on:
      - db
     networks:
@@ -20,8 +20,8 @@ services:
     image: mongo
     volumes:
       - mongo-data:/data/db
-      #- /etc/timezone:/etc/timezone
-      #- /etc/localtime:/etc/localtime
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
     ports:
       - "27017:27017"
     networks:
@@ -35,9 +35,9 @@ services:
   api:
     build: ../gui34
     image: loopback-api
-    #volumes:
-      #- /etc/timezone:/etc/timezone
-      #- /etc/localtime:/etc/localtime
+    volumes:
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
     ports:
       - "3001:3000"
     networks:
@@ -54,11 +54,11 @@ services:
     volumes:
      - /var/run/docker.sock:/var/run/docker.sock:ro
      - camera-data:/app/known:ro
-     #- /etc/timezone:/etc/timezone
-     #- /etc/localtime:/etc/localtime
+     - /etc/timezone:/etc/timezone
+     - /etc/localtime:/etc/localtime
     ports:
-     - "5000:5000"
-     #- "5000"
+     #- "5000:5000"
+     - "5000"
     expose:
      - "5000"
     networks:
