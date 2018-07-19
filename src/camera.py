@@ -23,11 +23,14 @@ from imutils.video import WebcamVideoStream
 from imutils.video import FileVideoStream
 from imutils.face_utils import FaceAligner
 from imutils.face_utils import rect_to_bb
+from imutils.object_detection import non_max_suppression
+from imutils import paths
 from imutils.video import FPS
 import base64
 from base64 import b64encode
 from skimage.measure import compare_ssim
 import socket
+import dlib
 
 from cli import Recon
 from draw import Draw
@@ -51,7 +54,7 @@ from draw import Draw
 logging.basicConfig(format="[%(asctime)s] p%(process)s {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s")
 
 logger = logging.getLogger('async')
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 fc = {}
 local = {}
@@ -72,7 +75,7 @@ def init():
 		local['feedURL'] = fc['feedURL']
 	except:
 		#Face Recognition parameters
-		fc['tolerance'] = 0.68
+		fc['tolerance'] = 0.5
 		fc['show_distance'] = False
 		fc['prototxt'] = "deploy.prototxt.txt"
 		fc['prototxt_object'] = "MobileNetSSD_deploy.prototxt.txt"
@@ -80,13 +83,15 @@ def init():
 		fc['model_object'] = "MobileNetSSD_deploy.caffemodel"
 		fc['shape_predictor'] = "shape_predictor_68_face_landmarks.dat"
 		fc['confidence'] = 0.25
-		local['feedURL'] = "rtsp://admin:admin123@190.218.236.232:555/cam/realmonitor?channel=15&subtype=0"
+		fc['confidence_obj'] = 0.8
+		#local['feedURL'] = "rtsp://admin:admin123@190.218.236.232:555/cam/realmonitor?channel=15&subtype=0"
+		#local['feedURL'] = "rtsp://admin:admin123@192.168.0.107:554/cam/realmonitor?channel=15&subtype=0"
 		#local['feedURL'] = "rtsp://admin:admin@192.168.0.61:554/"
-		#local['feedURL'] = "/tmp/abc.mp4"
+		local['feedURL'] = "/tmp/abc3.mp4"
 		#local['feedURL'] = "/Users/admin/Downloads/abc3.mp4"
 		#local['feedURL'] = 0
 		fc['camera_name'] = fc['hostname']
-		fc['enableObjectDetection'] = False
+		fc['enableObjectDetection'] = True
 
 
 	# Load an color image
@@ -117,13 +122,13 @@ def init():
 	local['shutdown'] = False
 	local['gimage'] = None
 	local['known_people_folder'] = 'known/camera'
-	local['timer'] = 2
+	local['timer'] = 20
 
 	local['modulo'] = 5
 	local['color_unknow'] = (0, 0, 255)
 	local['color_know'] = (162, 255, 0)
 	local['thickness'] = 2
-	local['number_fps_second'] = 1/1000
+	local['number_fps_second'] = 1/30
 	local['quality'] = 100
 	local['banner'] = "hello..."
 	local['color_banner'] = (0, 0, 255)
@@ -141,6 +146,16 @@ def init():
 	logger.info("loading knowns...")
 	local['face_recognition'] = Recon(local['known_people_folder'], fc['tolerance'], fc['show_distance'])
 	logger.info('encoding of the known folder completed in: {:.2f}s'.format(time.time() - start_encoding))
+
+	# initialize the HOG descriptor/person detector
+	local['hog'] = cv2.HOGDescriptor()
+	local['hog'].setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
+
+	# initialize dlib's face detector (HOG-based) and then create
+	# the facial landmark predictor and the face aligner
+	local['detector'] = dlib.get_frontal_face_detector()
+	local['predictor'] = dlib.shape_predictor(fc['shape_predictor'])
+	local['fa'] = FaceAligner(local['predictor'], desiredFaceWidth=256)
 
 	#Check if OpenCV is Optimized:
 	logger.info("CV2 Optimized: {}".format(cv2.useOptimized()))
@@ -163,7 +178,7 @@ async def add(_id, photo, firstname, lastname, _oldName):
 		logger.info ("Unexpected error: ", e)
 		pass
 
-#CHANGE KNOWN FOLDER TO VAR
+#CHANGE KNOWN FOLDER TO: VAR
 async def delete(_id, firstname, lastname):
 	try:
 		os.remove("./known/camera/" + _id + '.' + firstname + '_' + lastname + ".jpg")
@@ -174,216 +189,233 @@ async def delete(_id, firstname, lastname):
 	logger.info ('delete{}'.format(_id))
 
 async def read_frame(image):
-	local['frames'] = local['frames'] + 1
-
 	try:
-		overlay = imutils.resize(image, width=local['video_size'])
-	except:
-		overlay = local['emptyFeed']
+		local['frames'] = local['frames'] + 1
 
-	# grab the frame dimensions and convert it to a blob
-	(h, w) = overlay.shape[:2]
+		try:
+			orig = image.copy()
+		except:
+			image = local['emptyFeed']
+			orig = image.copy()
 
-	if (local['frames'] % local['modulo'] == 0):
+		display = imutils.resize(orig, width=local['video_size'])
 
-		blob = cv2.dnn.blobFromImage(cv2.resize(overlay, (300, 300)), 1.0,
-			(300, 300), (104.0, 177.0, 123.0))
-		if fc['enableObjectDetection']:
-			blob_obj = cv2.dnn.blobFromImage(cv2.resize(overlay, (300, 300)),
-			0.007843, (300, 300), 127.5)
+		if (local['frames'] % local['modulo'] == 0):
 
-		# pass the blob through the network and obtain the detections and
-		# predictions
-		local['net'].setInput(blob)
-		detections = local['net'].forward()
-		if fc['enableObjectDetection']:
-			local['net_object'].setInput(blob_obj)
-			detections_obj = local['net_object'].forward()
+			# load the image and resize it to (1) reduce detection time
+			# and (2) improve detection accuracy
 
-		box = {}
-		box_obj = {}
-		text = {}
-		result = {}
+			rp = 400.0 / image.shape[1]
+			dimp = (400, int(image.shape[0] * rp))
 
-		# loop over the detections
-		for i in range(0, detections.shape[2]):
+			image = cv2.resize(image, dimp, interpolation = cv2.INTER_AREA)
 
-			# extract the confidence (i.e., probability) associated with the
-			# prediction
-			_confidence = detections[0, 0, i, 2]
+			# detect people in the image
+			(rects, weights) = local['hog'].detectMultiScale(image, winStride=(4, 4),
+				padding=(8, 8), scale=1.05)
 
-			# filter out weak detections by ensuring the `confidence` is
-			# greater than the minimum confidence
-			if (i == 0) and (_confidence >= fc['confidence']):
-				logger.debug("-----s -----")
+			# apply non-maxima suppression to the bounding boxes using a
+			# fairly large overlap threshold to try to maintain overlapping
+			# boxes that are still people
+			rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
+			pick = non_max_suppression(rects, probs=None, overlapThresh=0.65)
 
-			if _confidence < fc['confidence']:
-				continue
+			# draw the final bounding boxes
+			minX = 100000
+			minY = 100000
+			maxW = 0
+			maxH = 0
 
-			logger.debug("detections: {}".format(_confidence))
+			for (xA, yA, xB, yB) in pick:
+				if xA < minX: minX = xA
+				if yA < minY: minY = yA
+				if xB > maxW: maxW = xB
+				if yB > maxH: maxH = yB
 
-			# compute the (x, y)-coordinates of the bounding box for the object
-			box[i] = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
-			(startX, startY, endX, endY) = box[i].astype("int")
-			(x1, y1, x2, y2) = box[i].astype("int")
+			cropped = image[minY:maxH, minX:maxW]
 
-			# draw the bounding box of the face along with the associated probability
-			txt = "{:.2f}%".format(_confidence * 100)
-			text[i] = txt
-			y = startY - 10 if startY - 10 > 10 else startY + 10
+			if maxH + maxW != 0:
 
-			#overlay = cv2.cvtColor(overlay, cv2.COLOR_BGR2GRAY)
-			cropped = overlay[startY:endY, startX:endX]
+				### BRILLO ###
+				b = 64. # brightness
+				c = 0.  # contrast
 
-			array = []
-			distances = []
-			array, distances = await local['face_recognition'].test_image(cropped)
-			#array = ['0.unknown']
-			logger.debug("array: {}".format(array))
-			result[i] = 'unknown'
+				#call addWeighted function, which performs:
+				#    dst = src1*alpha + src2*beta + gamma
+				# we use beta = 0 to effectively only operate on src1
+				face = cv2.addWeighted(cropped, 1. + c/127., cropped, 0, b-c)
+				orig = cv2.addWeighted(orig, 1. + c/127., orig, 0, b-c)
 
-			if (array != ['0.unknown']) and (array != []):
-				# If Customer Known
-				try:
-					local['capture'][array[0]]
-				except (KeyError, IndexError) as e:
-					if startY-50 < 0:
-							x1 = 0
-					else:
-							x1 = startY-50
-					if endY+50 < 0:
-							y1 = 0
-					else:
-							y1 = endY+50
-					if startX-50 < 0:
-							x2 = 0
-					else:
-							x2 = startX-50
-					if endX+50 < 0:
-							y2 = 0
-					else:
-							y2 = endX+50
-					saved = overlay[x1:y1, x2:y2]
+				### FACE RECOGNITION
+				(h, w) = face.shape[:2]
 
-					local['capture'][array[0]] = [cropped, box[i], text[i]]
+				blob = cv2.dnn.blobFromImage(cv2.resize(face, (300, 300)), 1.0,
+								(300, 300), (104.0, 177.0, 123.0))
 
-					retval, jpg = cv2.imencode('.jpg', saved)
-					base64_bytes = b64encode(jpg)
-					wsMessage = json.dumps({"action":"add_known", "date": time.strftime("%Y%m%d%H%M%S"), "name": str.split(array[0], '.')[0], "confidence":text[i], "image": base64_bytes.decode('utf-8'), "camera":fc['camera_name']})
+				# pass the blob through the network and obtain the detections and
+				# predictions
+				local['net'].setInput(blob)
+				detections = local['net'].forward()
 
-					try:
-						logger.info('add known: {}'.format(str.split(array[0], '.')[0]))
-						await local['control'].send_str(wsMessage)
-					except Exception as ex:
-							local['ws_msg'] = wsMessage
-							template = "an exception of type {0} occurred. arguments:\n{1!r}"
-							message = template.format(type(ex).__name__, ex.args)
-							logger.error("error sending message:")
-							logger.error(message)
+				box = {}
+				box_obj = {}
+				text = {}
+				result = {}
 
-				if array[0].startswith( '0.unknown' ):
-					color = local['color_unknow']
-				else:
-					color = local['color_know']
-				result[i] = str.split(array[0], '.')[1]
-			else:
-				#If Customer unknown
-				color = local['color_unknow']
-				add = await local['face_recognition'].unknown_people(cropped, '0.unknown'+str(local['unknown']), None)
-				logger.debug("unknow: {}".format(add))
-				if add > 0:
-					if startY-50 < 0:
-							x1 = 0
-					else:
-							x1 = startY-50
-					if endY+50 < 0:
-							y1 = 0
-					else:
-							y1 = endY+50
-					if startX-50 < 0:
-							x2 = 0
-					else:
-							x2 = startX-50
-					if endX+50 < 0:
-							y2 = 0
-					else:
-							y2 = endX+50
-					saved = overlay[x1:y1, x2:y2]
-					local['capture']['0.unknown'+str(local['unknown'])] = [cropped, box[i], text[i]]
-					retval, jpg = cv2.imencode('.jpg', saved)
-					base64_bytes = b64encode(jpg)
-					wsMessage = json.dumps({"action":"add_unknown", "date": time.strftime("%Y%m%d%H%M%S"), "name": 'unknown'+str(local['unknown']), "confidence":text[i], "image": base64_bytes.decode('utf-8'), "camera":fc['camera_name']})
+				for i in range(0, detections.shape[2]):
 
-					try:
-						logger.info('add unknown: {}'.format('unknown'+str(local['unknown'])))
-						await local['control'].send_str(wsMessage)
-					except Exception as ex:
-							local['ws_msg'] = wsMessage
-							template = "an exception of type {0} occurred. arguments:\n{1!r}"
-							message = template.format(type(ex).__name__, ex.args)
-							logger.error("error sending message:")
-							logger.error(message)
+					# extract the confidence (i.e., probability) associated with the
+					# prediction
+					confidence = detections[0, 0, i, 2]
 
-					result[i] = 'unknown'+str(local['unknown'])
-				local['unknown'] = local['unknown'] + 1
+					# filter out weak detections by ensuring the `confidence` is
+					# greater than the minimum confidence
 
-			if array[0].startswith( '0.unknown' ):
-				color = local['color_unknow']
-			else:
-				color = local['color_know']
+					if confidence > fc['confidence']:
+						#logger.debug('confidence: {} / {}'.format(confidence,fc['confidence']))
 
-			overlay = local['draw'].face(overlay, 10, 10, startX, y, endY, x1, x2, y1, y2, color, local['thickness'], text[i], result[i])
+						# compute the (x, y)-coordinates of the bounding box for the
+						# object
+						box[i] = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+						(startX, startY, endX, endY) = box[i].astype("int")
 
-		if fc['enableObjectDetection']:
-			_length = detections_obj.copy()
-			for i in np.arange(0, detections_obj.shape[2]):
-				# extract the confidence (i.e., probability) associated with
-				# the prediction
-				_confidence = detections_obj[0, 0, i, 2]
+						# crop the face(s)
+						face = face[startY:endY, startX:endX]
 
-				# filter out weak detections_obj by ensuring the `confidence` is
-				# greater than the minimum confidence
-				if _confidence > fc['confidence']:
-					# extract the index of the class label from the
-					# `detections_obj`, then compute the (x, y)-coordinates of
-					# the bounding box for the object
-					idx = int(detections_obj[0, 0, i, 1])
-					box_obj = detections_obj[0, 0, i, 3:7] * np.array([w, h, w, h])
-					(startX, startY, endX, endY) = xbox_obj.astype("int")
+						if startY < 1 or endY < 1 or startX < 1 or endX < 1:
+							continue
 
-					# draw the prediction on the frame
-					label = "{}: {:.2f}%".format(local['classes'][idx],
-						_confidence * 100)
-					cv2.rectangle(overlay, (startX, startY), (endX, endY),
-						local['colors'][idx], 2)
-					cv2.rectangle(local['gimage'], (startX, startY), (endX, endY),
-						local['colors'][idx], 2)
-					y = startY - 15 if startY - 15 > 15 else startY + 15
-					cv2.putText(overlay, label, (startX, y),
-						cv2.FONT_HERSHEY_SIMPLEX, 0.5, local['colors'][idx], 2)
-					cv2.putText(local['gimage'], label, (startX, y),
-						cv2.FONT_HERSHEY_SIMPLEX, 0.5, local['colors'][idx], 2)
+						if startY > 300 or endY > 300 or startX > 300 or endX > 300:
+							continue
 
-		local['box'] = box
-		local['text'] = text
-		local['result'] = result
+						ratioY = int(minY*3.2)
+						ratioH = int(maxH*3.2)
+						ratioX = int(minX*3.2)
+						ratioW = int(maxW*3.2)
 
-	else:
-		if len(local['box']) > 0:
+						#print("[INFO] Y={} H={} X={} W={}".format(minY, maxH, minX, maxW))
 
-			for i in range(0, len(local['box'])):
-				(startX, startY, endX, endY) = local['box'][i].astype("int")
-				(x1, y1, x2, y2) = local['box'][i].astype("int")
-				y = startY - 10 if startY - 10 > 10 else startY + 10
+						startY = int(startY*3.2)
+						endY = int(endY*1.3)
+						startX = int(startX*3.2)
+						endX = int(endX*1.3)
 
-				if local['result'][i].startswith( 'unknown' ):
-					color = local['color_unknow']
-				else:
-					color = local['color_know']
+						#print("[INFO] Y'={} H'={} X'={} W'={}".format(startY, endY, startX, endX))
 
-				overlay = local['draw'].face(overlay, 10, 10, startX, y, endY, x1, x2, y1, y2, color, local['thickness'], local['text'][i], local['result'][i])
+						ratioY = startY + ratioY
+						ratioH = endY + ratioY
+						ratioX = startX + ratioX
+						ratioW = endX + ratioX
 
-	return overlay
+						#cv2.imshow("FACE", face)
+						txt = "{:.2f}%".format(confidence * 100)
+						text[i] = txt
+
+						cropped = orig[ratioY:ratioH, ratioX:ratioW]
+						gray = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
+						rects = local['detector'](gray, 2)
+
+						for rect in rects:
+							#logger.debug("in the rects")
+							# extract the ROI of the *original* face, then align the face using facial landmarks
+							(x, y, w, h) = rect_to_bb(rect)
+							faceAligned = local['fa'].align(cropped, gray, rect)
+
+							array = []
+							distances = []
+							array, distances = await local['face_recognition'].test_image(faceAligned)
+							#array = ['0.unknown']
+							#logger.debug("array: {}".format(array))
+							#logger.debug("distances: {}".format(distances))
+							result[i] = 'unknown'
+							logger.debug("capture #: {}".format(len(local['capture'])))
+
+							if (array != ['0.unknown']) and (array != []):
+								try:
+									local['capture'][array[0]]
+								except (KeyError, IndexError) as e:
+									local['capture'][array[0]] = [faceAligned, box[i], text[i]]
+
+									try:
+										retval, jpg = cv2.imencode('.jpg', faceAligned)
+										base64_bytes = b64encode(jpg)
+										wsMessage = json.dumps({"action":"add_known", "date": time.strftime("%Y%m%d%H%M%S"), "name": str.split(array[0], '.')[0], "confidence":text[i], "image": base64_bytes.decode('utf-8'), "camera":fc['camera_name']})
+
+										#logger.info('add known: {}'.format(str.split(array[0], '.')[0]))
+										await local['control'].send_str(wsMessage)
+									except Exception as ex:
+											local['ws_msg'] = wsMessage
+											exc_type, exc_obj, exc_tb = sys.exc_info()
+											template = "an exception of type {0} occurred. arguments:\n{1!r}"
+											message = template.format(type(ex).__name__, ex.args)
+											logger.error("error sending message line: {}".format(exc_tb.tb_lineno))
+											logger.error(message)
+
+								if array[0].startswith( '0.unknown' ):
+									color = local['color_unknow']
+								else:
+									color = local['color_know']
+								result[i] = str.split(array[0], '.')[1]
+							else:
+								color = local['color_unknow']
+								add = await local['face_recognition'].unknown_people(faceAligned, '0.unknown'+str(local['unknown']), None)
+								logger.debug("unknow: {}".format(add))
+
+								if add != 0:
+									try:
+										retval, jpg = cv2.imencode('.jpg', faceAligned)
+										base64_bytes = b64encode(jpg)
+										wsMessage = json.dumps({"action":"add_unknown", "date": time.strftime("%Y%m%d%H%M%S"), "name": 'unknown'+str(local['unknown']), "confidence":text[i], "image": base64_bytes.decode('utf-8'), "camera":fc['camera_name']})
+										logger.info('add unknown: {}'.format('unknown'+str(local['unknown'])))
+										await local['control'].send_str(wsMessage)
+
+										local['capture']['0.unknown'+str(local['unknown'])] = [faceAligned, box[i], text[i]]
+
+									except Exception as ex:
+										local['ws_msg'] = wsMessage
+										exc_type, exc_obj, exc_tb = sys.exc_info()
+										template = "an exception of type {0} occurred. arguments:\n{1!r}"
+										message = template.format(type(ex).__name__, ex.args)
+										logger.error("error sending message line: {}".format(exc_tb.tb_lineno))
+										logger.error(message)
+
+										result[i] = 'unknown'+str(local['unknown'])
+							local['unknown'] = local['unknown'] + 1
+
+
+							if array[0].startswith( '0.unknown' ):
+								color = local['color_unknow']
+							else:
+								color = local['color_know']
+
+							#overlay = local['draw'].face(display, 10, 10, ratioX, ratioY, ratioH, ratioW, (endX-((endX-startX)-faceEndX)), startY, (endY-((endY-startY)-faceEndY)), color, local['thickness'], text[i], result[i])
+
+				local['box'] = box
+				local['text'] = text
+				local['result'] = result
+
+		else:
+			if len(local['box']) > 0:
+
+				for i in range(0, len(local['box'])):
+					(startX, startY, endX, endY) = local['box'][i].astype("int")
+					(x1, y1, x2, y2) = local['box'][i].astype("int")
+					y = startY - 10 if startY - 10 > 10 else startY + 10
+
+					# if local['result'][i].startswith( 'unknown' ):
+					# 	color = local['color_unknow']
+					# else:
+					# 	color = local['color_know']
+
+					#overlay = local['draw'].face(overlay, 10, 10, startX, y, endY, x1, x2, y1, y2, color, local['thickness'], local['text'][i], local['result'][i])
+
+	except Exception as ex:
+		exc_type, exc_obj, exc_tb = sys.exc_info()
+		template = "an exception of type {0} occurred. arguments:\n{1!r}"
+		message = template.format(type(ex).__name__, ex.args)
+		logger.error("error sending message line: {}".format(exc_tb.tb_lineno))
+		logger.error(message)
+	return display
 
 async def process_video():
 
@@ -394,9 +426,9 @@ async def process_video():
 	local['result'] = {}
 
 	try:
-		local['_camera'] = WebcamVideoStream(src=local['feedURL']).start()
+		#local['_camera'] = WebcamVideoStream(src=local['feedURL']).start()
 		#local['_camera'] = VideoStream(local['feedURL']).start()
-		#local['_camera'] = cv2.VideoCapture(local['feedURL'])
+		local['_camera'] = cv2.VideoCapture(local['feedURL'])
 		await asyncio.sleep(2)
 	except Exception as ex:
 		template = "an exception of type {0} occurred. arguments:\n{1!r}"
@@ -417,9 +449,14 @@ async def process_video():
 			start_timer = time.time()
 
 		c_fps = FPS().start()
-		#grab, image = local['_camera'].read()
-		image = local['_camera'].read()
+		try:
+			grab, image = local['_camera'].read()
+		except:
+			print ("grab: ", grab)
+			image = local['emptyFeed']
 
+		#image = local['_camera'].read()
+		#logger.debug('read')
 		image = await read_frame(image)
 
 		encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), local['quality']]
@@ -479,6 +516,10 @@ async def localFeedHandle(request):
 		await asyncio.sleep(local['number_fps_second'])
 
 async def heartbeat(timer):
+	while local['control'] == None:
+		logger.debug('waiting...')
+		await asyncio.sleep(1)
+
 	while not local['shutdown']:
 		logger.info('heartbeat control center')
 		if local['control'] != None:
@@ -501,7 +542,7 @@ async def control(timer):
 			#async with aiohttp.ClientSession() as session:
 				#async with session.ws_connect(f'ws://control:1880/control') as ws:
 			async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
-				async with session.ws_connect(f'wss://gitlab.exception34.com/control', heartbeat=2, receive_timeout=5) as ws:
+				async with session.ws_connect(f'wss://exception34.com/control', heartbeat=2, receive_timeout=5) as ws:
 					local['control'] = ws
 					logger.info ('control connected')
 					async for msg in ws:
@@ -575,8 +616,8 @@ async def control(timer):
 										local['feedURL'] = payload['url']
 									fc['feedURL'] = local['feedURL']
 									#local['_camera'].stop()
-									#local['_camera'] = cv2.VideoCapture(local['feedURL'])
-									local['_camera'] = WebcamVideoStream(src=local['feedURL']).start()
+									local['_camera'] = cv2.VideoCapture(local['feedURL'])
+									#local['_camera'] = WebcamVideoStream(src=local['feedURL']).start()
 							elif msg.type == aiohttp.WSMsgType.CLOSED:
 								break
 							elif msg.type == aiohttp.WSMsgType.ERROR:
@@ -592,8 +633,10 @@ async def feedsocket(timer):
 	while not local['shutdown']:
 		logger.info('connecting to control center')
 		try:
+			#async with aiohttp.ClientSession() as session:
+				#async with session.ws_connect(f'ws://control:1880/feed2') as ws:
 			async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
-				async with session.ws_connect(f'wss://gitlab.exception34.com/feed2', heartbeat=2, receive_timeout=5) as ws:
+				async with session.ws_connect(f'wss://exception34.com/feed2', heartbeat=2, receive_timeout=5) as ws:
 					local['feed'] = ws
 					logger.info ('feed connected')
 					async for msg in ws:
@@ -629,10 +672,10 @@ async def build_server(loop, address, port):
 		#app.on_cleanup.append(cleanup_background_tasks)
 		#app.on_shutdown.append(on_shutdown)
 		#logger.info("Web Server Started!!")
-		#sslcontext = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
-		#sslcontext.load_cert_chain('./exception34.crt', './exception34.com.key')
-		#return await loop.create_server(app.make_handler(), address, port, ssl=sslcontext)
-		return await loop.create_server(app.make_handler(), address, port)
+		sslcontext = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+		sslcontext.load_cert_chain('./exception34.crt', './exception34.com.key')
+		return await loop.create_server(app.make_handler(), address, port, ssl=sslcontext)
+		#return await loop.create_server(app.make_handler(), address, port)
 
 if __name__ == '__main__':
 		init()

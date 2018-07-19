@@ -1,12 +1,13 @@
 # Dockerfile
 
-FROM python:3
+FROM python:3.6.6
 
 # install required debian packages
 # add any package that is required after `python-dev`, end the line with \
 RUN apt-get update && apt-get install -y --no-install-recommends apt-utils\
     build-essential \
     python-dev \
+    ibglib2.0-0 \
     cmake \
     telnet \
     vim \
@@ -14,6 +15,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends apt-utils\
 
 # install requirements
 COPY src/requirements.txt /tmp/requirements.txt
+COPY src/abc3.mp4 /tmp
+
 RUN pip3 install -r /tmp/requirements.txt
 
 # set /app as working directory

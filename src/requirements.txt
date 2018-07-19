@@ -1,8 +1,8 @@
 asyncio
 aiohttp
+numpy
 opencv-python
 dlib
-numpy
 imutils
 scikit-image
 face-recognition

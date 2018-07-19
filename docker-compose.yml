@@ -1,4 +1,4 @@
-version: "3"
+version: "2"
 services:
   control:
     build: ../control
@@ -7,6 +7,8 @@ services:
       - "1880:1880"
     volumes:
       - camera-data:/data
+      #- /etc/timezone:/etc/timezone
+      #- /etc/localtime:/etc/localtime
     depends_on:
      - db
     networks:
@@ -18,12 +20,13 @@ services:
     image: mongo
     volumes:
       - mongo-data:/data/db
+      #- /etc/timezone:/etc/timezone
+      #- /etc/localtime:/etc/localtime
     ports:
       - "27017:27017"
     networks:
       backend:
         ipv4_address: 172.10.0.201
-
     extra_hosts:
       - "control:172.10.0.200"
     # environment:
@@ -32,6 +35,9 @@ services:
   api:
     build: ../gui34
     image: loopback-api
+    #volumes:
+      #- /etc/timezone:/etc/timezone
+      #- /etc/localtime:/etc/localtime
     ports:
       - "3001:3000"
     networks:
@@ -44,19 +50,24 @@ services:
   camera:
     build: .
     image: camera-app
+    mem_limit: 2048m
     volumes:
      - /var/run/docker.sock:/var/run/docker.sock:ro
      - camera-data:/app/known:ro
+     #- /etc/timezone:/etc/timezone
+     #- /etc/localtime:/etc/localtime
     ports:
-     - "5000"
+     - "5000:5000"
+     #- "5000"
     expose:
      - "5000"
     networks:
       backend:
     extra_hosts:
-      - "control:172.10.0.200"
+    #   - "control:45.76.250.168"
+        - "control:172.10.0.200"
     depends_on:
-     - control
+      - control
   # nginx-proxy:
   #   image: jwilder/nginx-proxy
   #   ports:
