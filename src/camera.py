@@ -11,6 +11,7 @@ import datetime
 import pathlib
 import pickle
 import subprocess
+import objgraph
 
 
 from aiohttp import web
@@ -58,6 +59,8 @@ logger.setLevel(logging.DEBUG)
 
 fc = {}
 local = {}
+
+objgraph.show_most_common_types()
 
 def init():
 	global fc
@@ -440,6 +443,10 @@ async def process_video():
 	while not local['shutdown']:
 		end_timer = time.time()
 		if (end_timer - start_timer) > local['timer']:
+			logger.debug("memory:")
+			objgraph.show_most_common_types()
+			logger.debug("growth:")
+			objgraph.show_growth()
 			if local['capture']:
 				el = min(local['capture'])
 				error = local['capture'].pop(el, None)
@@ -542,7 +549,7 @@ async def control(timer):
 			async with aiohttp.ClientSession() as session:
 				async with session.ws_connect(f'ws://control:1880/node-red/control') as ws:
 			#async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
-				#async with session.ws_connect(f'wss://exception34.com/control', heartbeat=2, receive_timeout=5) as ws:
+				#async with session.ws_connect(f'wss://exception34.com/node-red/control', heartbeat=2, receive_timeout=5) as ws:
 					local['control'] = ws
 					logger.info ('control connected')
 					async for msg in ws:
@@ -636,7 +643,7 @@ async def feedsocket(timer):
 			async with aiohttp.ClientSession() as session:
 				async with session.ws_connect(f'ws://control:1880/node-red/feed2') as ws:
 			#async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
-				#async with session.ws_connect(f'wss://exception34.com/feed2', heartbeat=2, receive_timeout=5) as ws:
+				#async with session.ws_connect(f'wss://exception34.com/node-red/feed2', heartbeat=2, receive_timeout=5) as ws:
 					local['feed'] = ws
 					logger.info ('feed connected')
 					async for msg in ws:
