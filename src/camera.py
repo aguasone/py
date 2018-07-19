@@ -126,7 +126,7 @@ def init():
 	local['shutdown'] = False
 	local['gimage'] = None
 	local['known_people_folder'] = 'known/camera'
-	local['timer'] = 20
+	local['timer'] = 5
 
 	local['modulo'] = 1
 	local['color_unknow'] = (0, 0, 255)

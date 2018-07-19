@@ -30,6 +30,6 @@ RUN rm -rf /app/known
 RUN mkdir -p /app/known
 
 # run python script
-CMD ["python3", "camera.py"]
+CMD ["python3", "-u", "camera.py"]
 
 #docker run -d  -e HOST_PORT=5000 -p 5000:5000 camera-app
