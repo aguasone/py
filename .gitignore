@@ -10,3 +10,9 @@ venv
 src/\.config
 
 *.sublime-workspace
+
+*.key
+
+*.crt
+
+*.mp4

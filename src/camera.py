@@ -84,10 +84,10 @@ def init():
 		fc['shape_predictor'] = "shape_predictor_68_face_landmarks.dat"
 		fc['confidence'] = 0.25
 		fc['confidence_obj'] = 0.8
-		#local['feedURL'] = "rtsp://admin:admin123@190.218.236.232:555/cam/realmonitor?channel=15&subtype=0"
+		local['feedURL'] = "rtsp://admin:admin123@190.218.236.232:555/cam/realmonitor?channel=15&subtype=0"
 		#local['feedURL'] = "rtsp://admin:admin123@192.168.0.107:554/cam/realmonitor?channel=15&subtype=0"
 		#local['feedURL'] = "rtsp://admin:admin@192.168.0.61:554/"
-		local['feedURL'] = "/tmp/abc3.mp4"
+		#local['feedURL'] = "/tmp/abc3.mp4"
 		#local['feedURL'] = "/Users/admin/Downloads/abc3.mp4"
 		#local['feedURL'] = 0
 		fc['camera_name'] = fc['hostname']
@@ -426,9 +426,9 @@ async def process_video():
 	local['result'] = {}
 
 	try:
-		#local['_camera'] = WebcamVideoStream(src=local['feedURL']).start()
+		local['_camera'] = WebcamVideoStream(src=local['feedURL']).start()
 		#local['_camera'] = VideoStream(local['feedURL']).start()
-		local['_camera'] = cv2.VideoCapture(local['feedURL'])
+		#local['_camera'] = cv2.VideoCapture(local['feedURL'])
 		await asyncio.sleep(2)
 	except Exception as ex:
 		template = "an exception of type {0} occurred. arguments:\n{1!r}"
@@ -449,13 +449,13 @@ async def process_video():
 			start_timer = time.time()
 
 		c_fps = FPS().start()
-		try:
-			grab, image = local['_camera'].read()
-		except:
-			print ("grab: ", grab)
-			image = local['emptyFeed']
+		# try:
+		# 	grab, image = local['_camera'].read()
+		# except:
+		# 	print ("grab: ", grab)
+		# 	image = local['emptyFeed']
 
-		#image = local['_camera'].read()
+		image = local['_camera'].read()
 		#logger.debug('read')
 		image = await read_frame(image)
 
@@ -615,9 +615,9 @@ async def control(timer):
 									else:
 										local['feedURL'] = payload['url']
 									fc['feedURL'] = local['feedURL']
-									#local['_camera'].stop()
-									local['_camera'] = cv2.VideoCapture(local['feedURL'])
-									#local['_camera'] = WebcamVideoStream(src=local['feedURL']).start()
+									local['_camera'].stop()
+									#local['_camera'] = cv2.VideoCapture(local['feedURL'])
+									local['_camera'] = WebcamVideoStream(src=local['feedURL']).start()
 							elif msg.type == aiohttp.WSMsgType.CLOSED:
 								break
 							elif msg.type == aiohttp.WSMsgType.ERROR:
