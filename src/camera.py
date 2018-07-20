@@ -85,6 +85,10 @@ def init():
 		fc = pickle.load(file2)
 		file2.close()
 		local['feedURL'] = fc['feedURL']
+		if local['feedURL'].startswith('rtsp'):
+			args["video"] = False
+		else:
+			args["video"] = True
 	except:
 		#Face Recognition parameters
 		fc['tolerance'] = 0.5
@@ -451,11 +455,11 @@ async def process_video():
 	local['result'] = {}
 
 	try:
-		if args["video"]:
-			local['_camera'] = cv2.VideoCapture(local['feedURL'])
-		else:
+		if local['feedURL'].startswith('rtsp'):
 			local['_camera'] = WebcamVideoStream(src=local['feedURL']).start()
 			#local['_camera'] = VideoStream(local['feedURL']).start()
+		else:
+			local['_camera'] = cv2.VideoCapture(local['feedURL'])
 		await asyncio.sleep(2)
 	except Exception as ex:
 		template = "an exception of type {0} occurred. arguments:\n{1!r}"
@@ -486,14 +490,14 @@ async def process_video():
 			start_timer = time.time()
 
 		c_fps = FPS().start()
-		if args["video"]:
+		if local['feedURL'].startswith('rtsp'):
+			image = local['_camera'].read()
+		else:
 			try:
 				grab, image = local['_camera'].read()
 			except:
 				print ("grab: ", grab)
 				image = local['emptyFeed']
-		else:
-			image = local['_camera'].read()
 
 		image = await read_frame(image)
 
@@ -654,16 +658,18 @@ async def control(timer):
 								logger.info(payload['url'])
 								if payload['id'] == fc['hostname']:
 									local['camera_name'] = payload['name']
-									if  payload['url'] == "0":
+									if payload['url'] == "0":
 										local['feedURL'] = 0
 									else:
 										local['feedURL'] = payload['url']
+
 									fc['feedURL'] = local['feedURL']
-									if args["video"]:
-										local['_camera'] = cv2.VideoCapture(local['feedURL'])
-									else:
+									if payload['url'].startswith('rtsp'):
 										local['_camera'].stop()
 										local['_camera'] = WebcamVideoStream(src=local['feedURL']).start()
+									else:
+										local['_camera'] = cv2.VideoCapture(local['feedURL'])
+
 							elif msg.type == aiohttp.WSMsgType.CLOSED:
 								break
 							elif msg.type == aiohttp.WSMsgType.ERROR:
