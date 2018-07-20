@@ -13,6 +13,8 @@ import pickle
 import subprocess
 import objgraph
 import gc
+import argparse
+
 
 from aiohttp import web
 
@@ -50,6 +52,13 @@ from draw import Draw
 #rtsp://admin:Admin1234@190.141.212.109:554/Streaming/channels/1602
 #rtsp://admin:Admin1234@181.197.134.254:554/Streaming/channels/1602
 
+# construct the argument parse and parse the arguments
+ap = argparse.ArgumentParser()
+ap.add_argument("-l", "--local", action='store_true', required=False,
+	help="run outside docker")
+ap.add_argument("-v", "--video", action='store_true', required=False, default=False,
+	help="read from video")
+args = vars(ap.parse_args())
 
 #LOGS
 logging.basicConfig(format="[%(asctime)s] p%(process)s {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s")
@@ -87,12 +96,17 @@ def init():
 		fc['shape_predictor'] = "shape_predictor_68_face_landmarks.dat"
 		fc['confidence'] = 0.25
 		fc['confidence_obj'] = 0.8
-		local['feedURL'] = "rtsp://admin:admin123@190.218.236.232:555/cam/realmonitor?channel=15&subtype=0"
-		#local['feedURL'] = "rtsp://admin:admin123@192.168.0.107:554/cam/realmonitor?channel=15&subtype=0"
-		#local['feedURL'] = "rtsp://admin:admin@192.168.0.61:554/"
-		#local['feedURL'] = "/tmp/abc3.mp4"
-		#local['feedURL'] = "/Users/admin/Downloads/abc3.mp4"
-		#local['feedURL'] = 0
+		if args["video"]:
+			if args["local"]:
+				local['feedURL'] = "/Users/admin/Downloads/abc3.mp4"
+				#local['feedURL'] = 0
+			else:
+				local['feedURL'] = "/tmp/abc3.mp4"
+		else:
+			local['feedURL'] = "rtsp://admin:admin123@190.218.236.232:555/cam/realmonitor?channel=15&subtype=0"
+			#local['feedURL'] = "rtsp://admin:admin123@192.168.0.107:554/cam/realmonitor?channel=15&subtype=0"
+			#local['feedURL'] = "rtsp://admin:admin@192.168.0.61:554/"
+
 		fc['camera_name'] = fc['hostname']
 		fc['enableObjectDetection'] = True
 
@@ -437,9 +451,11 @@ async def process_video():
 	local['result'] = {}
 
 	try:
-		local['_camera'] = WebcamVideoStream(src=local['feedURL']).start()
-		#local['_camera'] = VideoStream(local['feedURL']).start()
-		#local['_camera'] = cv2.VideoCapture(local['feedURL'])
+		if args["video"]:
+			local['_camera'] = cv2.VideoCapture(local['feedURL'])
+		else:
+			local['_camera'] = WebcamVideoStream(src=local['feedURL']).start()
+			#local['_camera'] = VideoStream(local['feedURL']).start()
 		await asyncio.sleep(2)
 	except Exception as ex:
 		template = "an exception of type {0} occurred. arguments:\n{1!r}"
@@ -456,7 +472,7 @@ async def process_video():
 			logger.debug("growth:")
 			objgraph.show_growth()
 			gc.collect()
-			if len(local['capture'] == 0):
+			if len(local['capture']) == 0:
 				del local['capture']
 				local['capture'] = {}
 
@@ -470,14 +486,15 @@ async def process_video():
 			start_timer = time.time()
 
 		c_fps = FPS().start()
-		# try:
-		# 	grab, image = local['_camera'].read()
-		# except:
-		# 	print ("grab: ", grab)
-		# 	image = local['emptyFeed']
+		if args["video"]:
+			try:
+				grab, image = local['_camera'].read()
+			except:
+				print ("grab: ", grab)
+				image = local['emptyFeed']
+		else:
+			image = local['_camera'].read()
 
-		image = local['_camera'].read()
-		#logger.debug('read')
 		image = await read_frame(image)
 
 		encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), local['quality']]
@@ -529,9 +546,10 @@ async def localFeedHandle(request):
 		try:
 			await write(local['gimage'].tostring())
 		except Exception as ex:
+			exc_type, exc_obj, exc_tb = sys.exc_info()
 			template = "an exception of type {0} occurred. arguments:\n{1!r}"
 			message = template.format(type(ex).__name__, ex.args)
-			logger.error("error connecting to control center:")
+			logger.error("error sending message line: {}".format(exc_tb.tb_lineno))
 			logger.error(message)
 			await asyncio.sleep(1)
 		await asyncio.sleep(local['number_fps_second'])
@@ -563,10 +581,11 @@ async def control(timer):
 	while not local['shutdown']:
 		logger.info('connecting to control center')
 		try:
-			async with aiohttp.ClientSession() as session:
-				async with session.ws_connect(f'ws://control:1880/node-red/control') as ws:
-			#async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
-				#async with session.ws_connect(f'wss://exception34.com/node-red/control', heartbeat=2, receive_timeout=5) as ws:
+			link = f'ws://control:1880/node-red/control'
+			if args["local"]:
+				link = f'wss://exception34.com/node-red/control'
+			async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
+				async with session.ws_connect(link, heartbeat=2, receive_timeout=5) as ws:
 					del local['control']
 					local['control'] = ws
 					logger.info ('control connected')
@@ -640,9 +659,11 @@ async def control(timer):
 									else:
 										local['feedURL'] = payload['url']
 									fc['feedURL'] = local['feedURL']
-									local['_camera'].stop()
-									#local['_camera'] = cv2.VideoCapture(local['feedURL'])
-									local['_camera'] = WebcamVideoStream(src=local['feedURL']).start()
+									if args["video"]:
+										local['_camera'] = cv2.VideoCapture(local['feedURL'])
+									else:
+										local['_camera'].stop()
+										local['_camera'] = WebcamVideoStream(src=local['feedURL']).start()
 							elif msg.type == aiohttp.WSMsgType.CLOSED:
 								break
 							elif msg.type == aiohttp.WSMsgType.ERROR:
@@ -658,10 +679,11 @@ async def feedsocket(timer):
 	while not local['shutdown']:
 		logger.info('connecting to control center')
 		try:
-			async with aiohttp.ClientSession() as session:
-				async with session.ws_connect(f'ws://control:1880/node-red/feed2') as ws:
-			#async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
-				#async with session.ws_connect(f'wss://exception34.com/node-red/feed2', heartbeat=2, receive_timeout=5) as ws:
+			link = f'ws://control:1880/node-red/feed2'
+			if args["local"]:
+				link = f'wss://exception34.com/node-red/feed2'
+			async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
+				async with session.ws_connect(link, heartbeat=2, receive_timeout=5) as ws:
 					local['feed'] = ws
 					logger.info ('feed connected')
 					async for msg in ws:
@@ -696,12 +718,12 @@ async def build_server(loop, address, port):
 		app.router.add_route('GET', '/', baseHandle)
 		#app.on_cleanup.append(cleanup_background_tasks)
 		#app.on_shutdown.append(on_shutdown)
-		#logger.info("Web Server Started!!")
-		sslcontext = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
-		sslcontext.load_cert_chain('./exception34.crt', './exception34.com.key')
-
-		return await loop.create_server(app.make_handler(), address, port, ssl=sslcontext)
-		#return await loop.create_server(app.make_handler(), address, port)
+		if args["local"]:
+			return await loop.create_server(app.make_handler(), address, port)
+		else:
+			sslcontext = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+			sslcontext.load_cert_chain('./exception34.crt', './exception34.com.key')
+			return await loop.create_server(app.make_handler(), address, port, ssl=sslcontext)
 
 if __name__ == '__main__':
 		init()
