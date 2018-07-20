@@ -71,7 +71,9 @@ fc = {}
 local = {}
 
 proc = psutil.Process(os.getpid())
-logger.debug("mem: {}".format(proc.get_memory_info().rss))
+mem0 = proc.memory_info().rss
+local['mem'] = lambda x2, x1: 100.0 * (x2 - x1) / mem0
+
 objgraph.show_most_common_types()
 
 def init():
@@ -116,7 +118,6 @@ def init():
 
 		fc['camera_name'] = fc['hostname']
 		fc['enableObjectDetection'] = True
-
 
 	# Load an color image
 	local['emptyFeed'] = cv2.imread('nofeed.jpg',1)
@@ -474,15 +475,18 @@ async def process_video():
 	while not local['shutdown']:
 		end_timer = time.time()
 		if (end_timer - start_timer) > local['timer']:
-			logger.debug("memory:")
-			objgraph.show_most_common_types()
-			logger.debug("growth:")
-			objgraph.show_growth()
+			#logger.debug("memory:")
+			#objgraph.show_most_common_types()
+			#logger.debug("growth:")
+			#objgraph.show_growth()
+
+			mem3 = proc.memory_info().rss
+			logger.debug("---------- Memory Allocation: %0.2f%%" % local['mem'](mem3, mem0))
+
 			gc.collect()
 			if len(local['capture']) == 0:
 				del local['capture']
 				local['capture'] = {}
-
 
 			if local['capture']:
 				el = min(local['capture'])
@@ -490,6 +494,11 @@ async def process_video():
 				if error is not None:
 					if el.startswith( '0.unknown' ):
 						await local['face_recognition'].delete_unknown_names(el)
+
+			mem4 = proc.memory_info().rss
+			logger.debug("---------- Memory Collected: %0.2f%%" % local['mem'](mem4, mem3))
+			logger.debug("---------- Memory Overall: %0.2f%%" % local['mem'](mem4, mem0))
+
 			start_timer = time.time()
 
 		c_fps = FPS().start()
@@ -581,7 +590,6 @@ async def heartbeat(timer):
 				logger.error(message)
 		else:
 			logger.error('heartbeat lost to control center')
-
 		await asyncio.sleep(timer)
 
 async def control(timer):
@@ -735,15 +743,17 @@ async def build_server(loop, address, port):
 			return await loop.create_server(app.make_handler(), address, port, ssl=sslcontext)
 
 if __name__ == '__main__':
+		mem1 = proc.memory_info().rss
 		init()
 		loop = asyncio.get_event_loop()
+		mem2 = proc.memory_info().rss
+		logger.debug("---------- Allocation Initial: %0.2f%%" % local['mem'](mem2, mem0))
+
 		try:
 			asyncio.ensure_future(control(10))
 			asyncio.ensure_future(heartbeat(20))
 			local['feedler'] = asyncio.ensure_future(process_video())
-
 			loop.run_until_complete(build_server(loop, '0.0.0.0', 5000))
-
 			loop.run_forever()
 		except KeyboardInterrupt:
 			 local['shutdown'] = True
