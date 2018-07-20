@@ -482,10 +482,6 @@ async def process_video():
 
 		encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), local['quality']]
 		rslt, image = cv2.imencode('.jpg', image, encode_param)
-		del local['gimage']
-		del local['wsimage']
-		local['gimage'] = None
-		local['gimage'] = None
 		local['gimage'] = image
 		local['wsimage'] = image
 
