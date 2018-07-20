@@ -262,6 +262,8 @@ async def read_frame(image):
 
 			if maxH + maxW != 0:
 
+				mem5 = proc.memory_info().rss
+
 				### BRILLO ###
 				b = 64. # brightness
 				c = 0.  # contrast
@@ -419,9 +421,15 @@ async def read_frame(image):
 				del local['box']
 				del local['text']
 				del local['result']
+
 				local['box'] = {}
 				local['text'] = {}
 				local['result'] = {}
+
+				if (local['frames'] % 5 == 0):
+					mem6 = proc.memory_info().rss
+					logger.debug("---------- Memory Collected 2: %0.2f%%" % local['mem'](mem6, mem5))
+					logger.debug("---------- Memory Overall 2: %0.2f%%" % local['mem'](mem6, mem0))
 
 				local['box'] = box
 				local['text'] = text
@@ -495,9 +503,10 @@ async def process_video():
 					if el.startswith( '0.unknown' ):
 						await local['face_recognition'].delete_unknown_names(el)
 
-			mem4 = proc.memory_info().rss
-			logger.debug("---------- Memory Collected: %0.2f%%" % local['mem'](mem4, mem3))
-			logger.debug("---------- Memory Overall: %0.2f%%" % local['mem'](mem4, mem0))
+			if (local['frames'] % 5 == 0):
+				mem4 = proc.memory_info().rss
+				logger.debug("---------- Memory Collected 1: %0.2f%%" % local['mem'](mem4, mem3))
+				logger.debug("---------- Memory Overall 1: %0.2f%%" % local['mem'](mem4, mem0))
 
 			start_timer = time.time()
 
@@ -517,6 +526,10 @@ async def process_video():
 		rslt, image = cv2.imencode('.jpg', image, encode_param)
 		local['gimage'] = image
 		local['wsimage'] = image
+
+		mem7 = proc.memory_info().rss
+		logger.debug("---------- Memory Collected 3: %0.2f%%" % local['mem'](mem7, mem4))
+		logger.debug("---------- Memory Overall 3: %0.2f%%" % local['mem'](mem7, mem0))
 
 		c_fps.update()
 		c_fps.stop()
