@@ -394,6 +394,13 @@ async def read_frame(image):
 
 							#overlay = local['draw'].face(display, 10, 10, ratioX, ratioY, ratioH, ratioW, (endX-((endX-startX)-faceEndX)), startY, (endY-((endY-startY)-faceEndY)), color, local['thickness'], text[i], result[i])
 
+				del local['box']
+				del local['text']
+				del local['result']
+				local['box'] = {}
+				local['text'] = {}
+				local['result'] = {}
+
 				local['box'] = box
 				local['text'] = text
 				local['result'] = result
@@ -449,6 +456,10 @@ async def process_video():
 			logger.debug("growth:")
 			objgraph.show_growth()
 			gc.collect()
+			if len(local['capture'] == 0):
+				del local['capture']
+				local['capture'] = {}
+
 
 			if local['capture']:
 				el = min(local['capture'])
@@ -471,6 +482,8 @@ async def process_video():
 
 		encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), local['quality']]
 		rslt, image = cv2.imencode('.jpg', image, encode_param)
+		del local['gimage']
+		del local['wsimage']
 		local['gimage'] = image
 		local['wsimage'] = image
 
@@ -536,6 +549,9 @@ async def heartbeat(timer):
 			try:
 				await local['control'].send_str(json.dumps({"action":"hello","port":fc['port'],"ip":fc['ip'],"hostname":fc['hostname'],"date":time.strftime("%Y%m%d%H%M%S")}))
 			except Exception as ex:
+				del local['control']
+				local['control'] = None
+
 				template = "an exception of type {0} occurred. arguments:\n{1!r}"
 				message = template.format(type(ex).__name__, ex.args)
 				logger.error("error connecting to control center:")
@@ -553,6 +569,7 @@ async def control(timer):
 				async with session.ws_connect(f'ws://control:1880/node-red/control') as ws:
 			#async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
 				#async with session.ws_connect(f'wss://exception34.com/node-red/control', heartbeat=2, receive_timeout=5) as ws:
+					del local['control']
 					local['control'] = ws
 					logger.info ('control connected')
 					async for msg in ws:
