@@ -218,6 +218,11 @@ async def read_frame(image):
 	try:
 		local['frames'] = local['frames'] + 1
 
+
+		if (local['frames'] % 5 == 0):
+			mem5 = proc.memory_info().rss
+			logger.debug("---------- Memory Collected 0: %0.2f%%" % local['mem'](mem5, local['mem3']))
+
 		try:
 			orig = image.copy()
 		except:
@@ -260,9 +265,12 @@ async def read_frame(image):
 
 			cropped = image[minY:maxH, minX:maxW]
 
-			if maxH + maxW != 0:
+			if (local['frames'] % 5 == 0):
+				mem12 = proc.memory_info().rss
+				logger.debug("---------- Memory Collected 1: %0.2f%%" % local['mem'](mem12, mem5))
 
-				mem5 = proc.memory_info().rss
+
+			if maxH + maxW != 0:
 
 				### BRILLO ###
 				b = 64. # brightness
@@ -289,6 +297,10 @@ async def read_frame(image):
 				box_obj = {}
 				text = {}
 				result = {}
+
+				if (local['frames'] % 5 == 0):
+					mem10 = proc.memory_info().rss
+					logger.debug("---------- Memory Collected 2: %0.2f%%" % local['mem'](mem10, mem12))
 
 				for i in range(0, detections.shape[2]):
 
@@ -426,14 +438,13 @@ async def read_frame(image):
 				local['text'] = {}
 				local['result'] = {}
 
-				if (local['frames'] % 5 == 0):
-					mem6 = proc.memory_info().rss
-					logger.debug("---------- Memory Collected 2: %0.2f%%" % local['mem'](mem6, mem5))
-					logger.debug("---------- Memory Overall 2: %0.2f%%" % local['mem'](mem6, mem0))
-
 				local['box'] = box
 				local['text'] = text
 				local['result'] = result
+
+				if (local['frames'] % 5 == 0):
+					mem11 = proc.memory_info().rss
+					logger.debug("---------- Memory Collected 3: %0.2f%%" % local['mem'](mem11, mem10))
 
 		else:
 			if len(local['box']) > 0:
@@ -456,9 +467,17 @@ async def read_frame(image):
 		message = template.format(type(ex).__name__, ex.args)
 		logger.error("error sending message line: {}".format(exc_tb.tb_lineno))
 		logger.error(message)
+
+	if (local['frames'] % 5 == 0):
+		mem4 = proc.memory_info().rss
+		logger.debug("---------- Memory Collected X: %0.2f%%" % local['mem'](mem4, mem11))
+		logger.debug("---------- Memory Overall X: %0.2f%%" % local['mem'](mem4, mem0))
+
 	return display
 
 async def process_video():
+
+	local['mem3'] = proc.memory_info().rss
 
 	local['frames'] = 0
 	local['unknown'] = 0
@@ -481,16 +500,12 @@ async def process_video():
 
 	start_timer = time.time()
 	while not local['shutdown']:
-		mem8 = proc.memory_info().rss
 		end_timer = time.time()
 		if (end_timer - start_timer) > local['timer']:
 			#logger.debug("memory:")
 			#objgraph.show_most_common_types()
 			#logger.debug("growth:")
 			#objgraph.show_growth()
-
-			mem3 = proc.memory_info().rss
-			logger.debug("---------- Memory Allocation: %0.2f%%" % local['mem'](mem3, mem0))
 
 			gc.collect()
 			if len(local['capture']) == 0:
@@ -503,11 +518,6 @@ async def process_video():
 				if error is not None:
 					if el.startswith( '0.unknown' ):
 						await local['face_recognition'].delete_unknown_names(el)
-
-			if (local['frames'] % 5 == 0):
-				mem4 = proc.memory_info().rss
-				logger.debug("---------- Memory Collected 1: %0.2f%%" % local['mem'](mem4, mem3))
-				logger.debug("---------- Memory Overall 1: %0.2f%%" % local['mem'](mem4, mem0))
 
 			start_timer = time.time()
 
@@ -527,11 +537,6 @@ async def process_video():
 		rslt, image = cv2.imencode('.jpg', image, encode_param)
 		local['gimage'] = image
 		local['wsimage'] = image
-
-		if (local['frames'] % 5 == 0):
-			mem7 = proc.memory_info().rss
-			logger.debug("---------- Memory Collected 3: %0.2f%%" % local['mem'](mem7, mem8))
-			logger.debug("---------- Memory Overall 3: %0.2f%%" % local['mem'](mem7, mem0))
 
 		c_fps.update()
 		c_fps.stop()
