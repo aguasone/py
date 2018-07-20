@@ -481,6 +481,7 @@ async def process_video():
 
 	start_timer = time.time()
 	while not local['shutdown']:
+		mem8 = proc.memory_info().rss
 		end_timer = time.time()
 		if (end_timer - start_timer) > local['timer']:
 			#logger.debug("memory:")
@@ -527,9 +528,10 @@ async def process_video():
 		local['gimage'] = image
 		local['wsimage'] = image
 
-		mem7 = proc.memory_info().rss
-		logger.debug("---------- Memory Collected 3: %0.2f%%" % local['mem'](mem7, mem4))
-		logger.debug("---------- Memory Overall 3: %0.2f%%" % local['mem'](mem7, mem0))
+		if (local['frames'] % 5 == 0):
+			mem7 = proc.memory_info().rss
+			logger.debug("---------- Memory Collected 3: %0.2f%%" % local['mem'](mem7, mem8))
+			logger.debug("---------- Memory Overall 3: %0.2f%%" % local['mem'](mem7, mem0))
 
 		c_fps.update()
 		c_fps.stop()
