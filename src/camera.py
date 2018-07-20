@@ -484,6 +484,8 @@ async def process_video():
 		rslt, image = cv2.imencode('.jpg', image, encode_param)
 		del local['gimage']
 		del local['wsimage']
+		local['gimage'] = None
+		local['gimage'] = None
 		local['gimage'] = image
 		local['wsimage'] = image
 
