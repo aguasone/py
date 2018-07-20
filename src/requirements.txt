@@ -8,3 +8,4 @@ imutils
 scikit-image
 face-recognition
 scipy
+psutil

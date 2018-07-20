@@ -14,6 +14,7 @@ import subprocess
 import objgraph
 import gc
 import argparse
+import psutil
 
 
 from aiohttp import web
@@ -69,6 +70,8 @@ logger.setLevel(logging.DEBUG)
 fc = {}
 local = {}
 
+proc = psutil.Process(os.getpid())
+logger.debug("mem: {}".format(proc.get_memory_info().rss))
 objgraph.show_most_common_types()
 
 def init():
