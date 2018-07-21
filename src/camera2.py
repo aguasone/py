@@ -257,169 +257,137 @@ async def read_frame(image):
 			maxW = 0
 			maxH = 0
 
-			print("{} original boxes, {} after suppression".format(
-			             len(rects), len(pick)))
 			for (xA, yA, xB, yB) in pick:
 				if xA < minX: minX = xA
 				if yA < minY: minY = yA
 				if xB > maxW: maxW = xB
 				if yB > maxH: maxH = yB
-				cv2.rectangle(image, (xA, yA), (xB, yB), (0,255,0),2)
+
+			cropped = image[minY:maxH, minX:maxW]
+
+			if (local['frames'] % 5 == 0):
+				mem12 = proc.memory_info().rss
+				logger.debug("---------- Memory Collected 1: %0.2f%%" % local['mem'](mem12, mem5))
 
 
-				cropped = image[minY:maxH, minX:maxW]
+			if maxH + maxW != 0:
+
+				### BRILLO ###
+				b = 64. # brightness
+				c = 0.  # contrast
+
+				#call addWeighted function, which performs:
+				#    dst = src1*alpha + src2*beta + gamma
+				# we use beta = 0 to effectively only operate on src1
+				face = cv2.addWeighted(cropped, 1. + c/127., cropped, 0, b-c)
+				orig = cv2.addWeighted(orig, 1. + c/127., orig, 0, b-c)
+
+				### FACE RECOGNITION
+				(h, w) = face.shape[:2]
+
+				blob = cv2.dnn.blobFromImage(cv2.resize(face, (300, 300)), 1.0,
+								(300, 300), (104.0, 177.0, 123.0))
+
+				# pass the blob through the network and obtain the detections and
+				# predictions
+				local['net'].setInput(blob)
+				detections = local['net'].forward()
+
+				box = {}
+				box_obj = {}
+				text = {}
+				result = {}
 
 				if (local['frames'] % 5 == 0):
-					mem12 = proc.memory_info().rss
-					logger.debug("---------- Memory Collected 1: %0.2f%%" % local['mem'](mem12, mem5))
+					mem10 = proc.memory_info().rss
+					logger.debug("---------- Memory Collected 2: %0.2f%%" % local['mem'](mem10, mem12))
 
+				for i in range(0, detections.shape[2]):
 
-				if maxH + maxW != 0:
+					# extract the confidence (i.e., probability) associated with the
+					# prediction
+					confidence = detections[0, 0, i, 2]
 
-					### BRILLO ###
-					b = 64. # brightness
-					c = 0.  # contrast
+					# filter out weak detections by ensuring the `confidence` is
+					# greater than the minimum confidence
 
-					#call addWeighted function, which performs:
-					#    dst = src1*alpha + src2*beta + gamma
-					# we use beta = 0 to effectively only operate on src1
-					face = cv2.addWeighted(cropped, 1. + c/127., cropped, 0, b-c)
-					orig = cv2.addWeighted(orig, 1. + c/127., orig, 0, b-c)
+					if confidence > fc['confidence']:
+						#logger.debug('confidence: {} / {}'.format(confidence,fc['confidence']))
 
-					### FACE RECOGNITION
-					(h, w) = face.shape[:2]
+						# compute the (x, y)-coordinates of the bounding box for the
+						# object
+						box[i] = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+						(startX, startY, endX, endY) = box[i].astype("int")
 
-					blob = cv2.dnn.blobFromImage(cv2.resize(face, (300, 300)), 1.0,
-									(300, 300), (104.0, 177.0, 123.0))
+						# crop the face(s)
+						face = face[startY:endY, startX:endX]
 
-					# pass the blob through the network and obtain the detections and
-					# predictions
-					local['net'].setInput(blob)
-					detections = local['net'].forward()
+						if startY < 1 or endY < 1 or startX < 1 or endX < 1:
+							continue
 
-					box = {}
-					box_obj = {}
-					text = {}
-					result = {}
+						if startY > 300 or endY > 300 or startX > 300 or endX > 300:
+							continue
 
-					if (local['frames'] % 5 == 0):
-						mem10 = proc.memory_info().rss
-						logger.debug("---------- Memory Collected 2: %0.2f%%" % local['mem'](mem10, mem12))
+						ratioY = int(minY*3.2)
+						ratioH = int(maxH*3.2)
+						ratioX = int(minX*3.2)
+						ratioW = int(maxW*3.2)
 
-					for i in range(0, detections.shape[2]):
+						#print("[INFO] Y={} H={} X={} W={}".format(minY, maxH, minX, maxW))
 
-						# extract the confidence (i.e., probability) associated with the
-						# prediction
-						confidence = detections[0, 0, i, 2]
+						startY = int(startY*3.2)
+						endY = int(endY*1.3)
+						startX = int(startX*3.2)
+						endX = int(endX*1.3)
 
-						# filter out weak detections by ensuring the `confidence` is
-						# greater than the minimum confidence
+						#print("[INFO] Y'={} H'={} X'={} W'={}".format(startY, endY, startX, endX))
 
-						if confidence > fc['confidence']:
-							#logger.debug('confidence: {} / {}'.format(confidence,fc['confidence']))
+						ratioY = startY + ratioY
+						ratioH = endY + ratioY
+						ratioX = startX + ratioX
+						ratioW = endX + ratioX
 
-							# compute the (x, y)-coordinates of the bounding box for the
-							# object
-							box[i] = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
-							(startX, startY, endX, endY) = box[i].astype("int")
+						#cv2.imshow("FACE", face)
+						txt = "{:.2f}%".format(confidence * 100)
+						text[i] = txt
 
-							# crop the face(s)
-							face = face[startY:endY, startX:endX]
+						cropped = orig[ratioY:ratioH, ratioX:ratioW]
+						gray = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
+						rects = local['detector'](gray, 2)
 
-							if startY < 1 or endY < 1 or startX < 1 or endX < 1:
-								continue
+						for rect in rects:
+							#logger.debug("in the rects")
+							# extract the ROI of the *original* face, then align the face using facial landmarks
+							(x, y, w, h) = rect_to_bb(rect)
+							faceAligned = local['fa'].align(cropped, gray, rect)
 
-							if startY > 300 or endY > 300 or startX > 300 or endX > 300:
-								continue
+							array = []
+							distances = []
+							array, distances = await local['face_recognition'].test_image(faceAligned)
+							#array = ['0.unknown']
+							#logger.debug("array: {}".format(array))
+							#logger.debug("distances: {}".format(distances))
+							result[i] = 'unknown'
+							logger.debug("capture #: {}".format(len(local['capture'])))
 
-							ratioY = int(minY*3.2)
-							ratioH = int(maxH*3.2)
-							ratioX = int(minX*3.2)
-							ratioW = int(maxW*3.2)
+							if (local['frames'] % 5 == 0):
+								mem15 = proc.memory_info().rss
+								logger.debug("---------- Memory Collected 5: %0.2f%%" % local['mem'](mem15, mem10))
 
-							#print("[INFO] Y={} H={} X={} W={}".format(minY, maxH, minX, maxW))
+							if (array != ['0.unknown']) and (array != []):
+								try:
+									local['capture'][array[0]]
+								except (KeyError, IndexError) as e:
+									local['capture'][array[0]] = [faceAligned, box[i], text[i]]
 
-							startY = int(startY*3.2)
-							endY = int(endY*1.3)
-							startX = int(startX*3.2)
-							endX = int(endX*1.3)
-
-							#print("[INFO] Y'={} H'={} X'={} W'={}".format(startY, endY, startX, endX))
-
-							ratioY = startY + ratioY
-							ratioH = endY + ratioY
-							ratioX = startX + ratioX
-							ratioW = endX + ratioX
-
-							#cv2.imshow("FACE", face)
-							txt = "{:.2f}%".format(confidence * 100)
-							text[i] = txt
-
-							cropped = orig[ratioY:ratioH, ratioX:ratioW]
-							gray = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
-							rects = local['detector'](gray, 2)
-
-							for rect in rects:
-								#logger.debug("in the rects")
-								# extract the ROI of the *original* face, then align the face using facial landmarks
-								(x, y, w, h) = rect_to_bb(rect)
-								faceAligned = local['fa'].align(cropped, gray, rect)
-
-								array = []
-								distances = []
-								array, distances = await local['face_recognition'].test_image(faceAligned)
-								#array = ['0.unknown']
-								#logger.debug("array: {}".format(array))
-								#logger.debug("distances: {}".format(distances))
-								result[i] = 'unknown'
-								logger.debug("capture #: {}".format(len(local['capture'])))
-
-								if (local['frames'] % 5 == 0):
-									mem15 = proc.memory_info().rss
-									logger.debug("---------- Memory Collected 5: %0.2f%%" % local['mem'](mem15, mem10))
-
-								if (array != ['0.unknown']) and (array != []):
 									try:
-										local['capture'][array[0]]
-									except (KeyError, IndexError) as e:
-										local['capture'][array[0]] = [faceAligned, box[i], text[i]]
+										retval, jpg = cv2.imencode('.jpg', faceAligned)
+										base64_bytes = b64encode(jpg)
+										wsMessage = json.dumps({"action":"add_known", "date": time.strftime("%Y%m%d%H%M%S"), "name": str.split(array[0], '.')[0], "confidence":text[i], "image": base64_bytes.decode('utf-8'), "camera":fc['camera_name']})
 
-										try:
-											retval, jpg = cv2.imencode('.jpg', faceAligned)
-											base64_bytes = b64encode(jpg)
-											wsMessage = json.dumps({"action":"add_known", "date": time.strftime("%Y%m%d%H%M%S"), "name": str.split(array[0], '.')[0], "confidence":text[i], "image": base64_bytes.decode('utf-8'), "camera":fc['camera_name']})
-
-											#logger.info('add known: {}'.format(str.split(array[0], '.')[0]))
-											await local['control'].send_str(wsMessage)
-										except Exception as ex:
-												local['ws_msg'] = wsMessage
-												exc_type, exc_obj, exc_tb = sys.exc_info()
-												template = "an exception of type {0} occurred. arguments:\n{1!r}"
-												message = template.format(type(ex).__name__, ex.args)
-												logger.error("error sending message line: {}".format(exc_tb.tb_lineno))
-												logger.error(message)
-
-									if array[0].startswith( '0.unknown' ):
-										color = local['color_unknow']
-									else:
-										color = local['color_know']
-									result[i] = str.split(array[0], '.')[1]
-								else:
-									color = local['color_unknow']
-									add = await local['face_recognition'].unknown_people(faceAligned, '0.unknown'+str(local['unknown']), None)
-									logger.debug("unknow: {}".format(add))
-
-									if add != 0:
-										try:
-											retval, jpg = cv2.imencode('.jpg', faceAligned)
-											base64_bytes = b64encode(jpg)
-											wsMessage = json.dumps({"action":"add_unknown", "date": time.strftime("%Y%m%d%H%M%S"), "name": 'unknown'+str(local['unknown']), "confidence":text[i], "image": base64_bytes.decode('utf-8'), "camera":fc['camera_name']})
-											logger.info('add unknown: {}'.format('unknown'+str(local['unknown'])))
-											await local['control'].send_str(wsMessage)
-
-											local['capture']['0.unknown'+str(local['unknown'])] = [faceAligned, box[i], text[i]]
-
-										except Exception as ex:
+										#logger.info('add known: {}'.format(str.split(array[0], '.')[0]))
+										await local['control'].send_str(wsMessage)
+									except Exception as ex:
 											local['ws_msg'] = wsMessage
 											exc_type, exc_obj, exc_tb = sys.exc_info()
 											template = "an exception of type {0} occurred. arguments:\n{1!r}"
@@ -427,47 +395,73 @@ async def read_frame(image):
 											logger.error("error sending message line: {}".format(exc_tb.tb_lineno))
 											logger.error(message)
 
-											result[i] = 'unknown'+str(local['unknown'])
-								local['unknown'] = local['unknown'] + 1
-
-
 								if array[0].startswith( '0.unknown' ):
 									color = local['color_unknow']
 								else:
 									color = local['color_know']
+								result[i] = str.split(array[0], '.')[1]
+							else:
+								color = local['color_unknow']
+								add = await local['face_recognition'].unknown_people(faceAligned, '0.unknown'+str(local['unknown']), None)
+								logger.debug("unknow: {}".format(add))
 
-								#overlay = local['draw'].face(display, 10, 10, ratioX, ratioY, ratioH, ratioW, (endX-((endX-startX)-faceEndX)), startY, (endY-((endY-startY)-faceEndY)), color, local['thickness'], text[i], result[i])
+								if add != 0:
+									try:
+										retval, jpg = cv2.imencode('.jpg', faceAligned)
+										base64_bytes = b64encode(jpg)
+										wsMessage = json.dumps({"action":"add_unknown", "date": time.strftime("%Y%m%d%H%M%S"), "name": 'unknown'+str(local['unknown']), "confidence":text[i], "image": base64_bytes.decode('utf-8'), "camera":fc['camera_name']})
+										logger.info('add unknown: {}'.format('unknown'+str(local['unknown'])))
+										await local['control'].send_str(wsMessage)
 
-					del local['box']
-					del local['text']
-					del local['result']
-					del detections
-					del blob
-					del face
-					del (h, w)
+										local['capture']['0.unknown'+str(local['unknown'])] = [faceAligned, box[i], text[i]]
+
+									except Exception as ex:
+										local['ws_msg'] = wsMessage
+										exc_type, exc_obj, exc_tb = sys.exc_info()
+										template = "an exception of type {0} occurred. arguments:\n{1!r}"
+										message = template.format(type(ex).__name__, ex.args)
+										logger.error("error sending message line: {}".format(exc_tb.tb_lineno))
+										logger.error(message)
+
+										result[i] = 'unknown'+str(local['unknown'])
+							local['unknown'] = local['unknown'] + 1
 
 
-					local['box'] = {}
-					local['text'] = {}
-					local['result'] = {}
+							if array[0].startswith( '0.unknown' ):
+								color = local['color_unknow']
+							else:
+								color = local['color_know']
 
-					local['box'] = box
-					local['text'] = text
-					local['result'] = result
+							#overlay = local['draw'].face(display, 10, 10, ratioX, ratioY, ratioH, ratioW, (endX-((endX-startX)-faceEndX)), startY, (endY-((endY-startY)-faceEndY)), color, local['thickness'], text[i], result[i])
 
-					if (local['frames'] % 5 == 0):
-						mem11 = proc.memory_info().rss
-						logger.debug("---------- Memory Collected 3: %0.2f%%" % local['mem'](mem11, mem10))
+				del local['box']
+				del local['text']
+				del local['result']
+				del detections
+				del blob
+				del face
+				del orig
+				del (h, w)
 
-				del cropped
-			del orig
+				local['box'] = {}
+				local['text'] = {}
+				local['result'] = {}
+
+				local['box'] = box
+				local['text'] = text
+				local['result'] = result
+
+				if (local['frames'] % 5 == 0):
+					mem11 = proc.memory_info().rss
+					logger.debug("---------- Memory Collected 3: %0.2f%%" % local['mem'](mem11, mem10))
+
 			del rects
 			del pick
 			del weights
 			del rp
 			del dimp
-
-			#del image
+			del cropped
+			del image
 
 
 		else:
@@ -497,8 +491,7 @@ async def read_frame(image):
 		logger.debug("---------- Memory Collected X: %0.2f%%" % local['mem'](mem4, mem5))
 		logger.debug("---------- Memory Overall X: %0.2f%%" % local['mem'](mem4, mem0))
 
-	return image
-	#return display
+	return display
 
 async def process_video():
 
@@ -823,3 +816,6 @@ if __name__ == '__main__':
 			loop.close()
 			logger.info("Shutting Down!")
 			sys.exit(1)
+
+
+
