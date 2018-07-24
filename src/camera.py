@@ -39,6 +39,8 @@ import dlib
 from cli import Recon
 from draw import Draw
 
+from pympler import tracker
+
 
 #os.environ['PYTHONASYNCIODEBUG'] = '1'
 #ffmpeg -f avfoundation -framerate 30 -i "0" -f mjpeg -q:v 100 -s 640x480 http://localhost:5000/feed
@@ -74,7 +76,8 @@ proc = psutil.Process(os.getpid())
 mem0 = proc.memory_info().rss
 local['mem'] = lambda x2, x1: 100.0 * (x2 - x1) / mem0
 
-objgraph.show_most_common_types()
+tr = tracker.SummaryTracker()
+tr.print_diff()
 
 def init():
 	global fc
@@ -105,9 +108,11 @@ def init():
 		fc['shape_predictor'] = "shape_predictor_68_face_landmarks.dat"
 		fc['confidence'] = 0.25
 		fc['confidence_obj'] = 0.8
+		fc['timer'] = 5
+
 		if args["video"]:
 			if args["local"]:
-				local['feedURL'] = "/Users/admin/Downloads/abc3.mp4"
+				local['feedURL'] = "/Users/admin/Downloads/dev/py/src/abc3.mp4"
 				#local['feedURL'] = 0
 			else:
 				local['feedURL'] = "/tmp/abc3.mp4"
@@ -148,7 +153,8 @@ def init():
 	local['shutdown'] = False
 	local['gimage'] = None
 	local['known_people_folder'] = 'known/camera'
-	local['timer'] = 5
+	local['recording'] = []
+	local['recording_timer'] = 30
 
 	local['modulo'] = 1
 	local['color_unknow'] = (0, 0, 255)
@@ -163,7 +169,9 @@ def init():
 	local['control'] = None
 	local['ffmpeg_feed'] = False
 
-	# load our serialized model from disk
+
+
+	# load our serialized mo#del from disk
 	logger.info("loading models...")
 	local['net'] = cv2.dnn.readNetFromCaffe(fc['prototxt'], fc['model'])
 	local['net_object'] = cv2.dnn.readNetFromCaffe(fc['prototxt_object'], fc['model_object'])
@@ -198,7 +206,7 @@ async def add(_id, photo, firstname, lastname, _oldName):
 	await local['face_recognition'].unknown_people( None, newName, cv2.imdecode(np.frombuffer(base64.decodebytes(str.encode(photo)), dtype=np.uint8), cv2.IMREAD_COLOR))
 	try:
 		local['capture'][newName] = local['capture'][oldName]
-		del local['capture'][oldName]
+		#del local['capture'][oldName]
 		logger.info("Added")
 	except Exception as e:
 		logger.info ("Unexpected error: ", e)
@@ -210,7 +218,7 @@ async def delete(_id, firstname, lastname):
 		os.remove("./known/camera/" + _id + '.' + firstname + '_' + lastname + ".jpg")
 	except:
 		pass
-	del local['capture'][_id + '.' + firstname + '_' + lastname]
+	#del local['capture'][_id + '.' + firstname + '_' + lastname]
 	await local['face_recognition'].delete_unknown_names(_id + '.' + firstname + '_' + lastname)
 	logger.info ('delete{}'.format(_id))
 
@@ -218,10 +226,11 @@ async def read_frame(image):
 	try:
 		local['frames'] = local['frames'] + 1
 
-
-		if (local['frames'] % 5 == 0):
-			mem5 = proc.memory_info().rss
-			logger.debug("---------- Memory Collected 0: %0.2f%%" % local['mem'](mem5, local['mem3']))
+		mem5 = proc.memory_info().rss
+		if local['memCheck'] != mem5:
+			logger.debug("------------------------------------- Memory Overall: %0.2f%%" % local['mem'](mem5, mem0))
+			logger.debug("------------------------------------- Memory Overall: %0.2f%%" % local['mem'](mem5, local['memCheck']))
+		local['memCheck'] = mem5
 
 		try:
 			orig = image.copy()
@@ -230,6 +239,10 @@ async def read_frame(image):
 			orig = image.copy()
 
 		display = imutils.resize(orig, width=local['video_size'])
+
+		# mem20 = proc.memory_info().rss
+		# if (local['mem'](mem20, mem5) > 0):
+		# 	logger.debug("---------- Memory Allocated Process 0: %0.2f%%" % local['mem'](mem20, mem5))
 
 		if (local['frames'] % local['modulo'] == 0):
 
@@ -257,8 +270,13 @@ async def read_frame(image):
 			maxW = 0
 			maxH = 0
 
-			print("{} original boxes, {} after suppression".format(
-			             len(rects), len(pick)))
+			# mem12 = proc.memory_info().rss
+			# if (local['mem'](mem12, mem20) > 0):
+			# 	logger.debug("---------- Memory Allocated Process 1: %0.2f%%" % local['mem'](mem12, mem20))
+
+			# if len(rects) > 0:
+			# 	logger.debug("{} original boxes, {} after suppression".format(
+			# 							 len(rects), len(pick)))
 			for (xA, yA, xB, yB) in pick:
 				if xA < minX: minX = xA
 				if yA < minY: minY = yA
@@ -269,9 +287,9 @@ async def read_frame(image):
 
 				cropped = image[minY:maxH, minX:maxW]
 
-				if (local['frames'] % 5 == 0):
-					mem12 = proc.memory_info().rss
-					logger.debug("---------- Memory Collected 1: %0.2f%%" % local['mem'](mem12, mem5))
+				# mem33 = proc.memory_info().rss
+				# if (local['mem'](mem33, mem12) > 0):
+				# 	logger.debug("---------- Memory Allocated Process 2: %0.2f%%" % local['mem'](mem33, mem12))
 
 
 				if maxH + maxW != 0:
@@ -302,9 +320,9 @@ async def read_frame(image):
 					text = {}
 					result = {}
 
-					if (local['frames'] % 5 == 0):
-						mem10 = proc.memory_info().rss
-						logger.debug("---------- Memory Collected 2: %0.2f%%" % local['mem'](mem10, mem12))
+					# mem10 = proc.memory_info().rss
+					# if (local['mem'](mem10, mem33) > 0):
+					# 	logger.debug("---------- Memory Allocated Process 3: %0.2f%%" % local['mem'](mem10, mem33))
 
 					for i in range(0, detections.shape[2]):
 
@@ -374,9 +392,9 @@ async def read_frame(image):
 								result[i] = 'unknown'
 								logger.debug("capture #: {}".format(len(local['capture'])))
 
-								if (local['frames'] % 5 == 0):
-									mem15 = proc.memory_info().rss
-									logger.debug("---------- Memory Collected 5: %0.2f%%" % local['mem'](mem15, mem10))
+								# mem15 = proc.memory_info().rss
+								# if (local['mem'](mem15, mem10) > 0):
+								# 	logger.debug("---------- Memory Allocated Process 4: %0.2f%%" % local['mem'](mem15, mem10))
 
 								if (array != ['0.unknown']) and (array != []):
 									try:
@@ -436,15 +454,20 @@ async def read_frame(image):
 								else:
 									color = local['color_know']
 
+								# mem4 = proc.memory_info().rss
+								# if (local['mem'](mem4, mem15) > 0):
+								# 	logger.debug("---------- Memory Allocated Process 5: %0.2f%%" % local['mem'](mem4, mem15))
+
+
 								#overlay = local['draw'].face(display, 10, 10, ratioX, ratioY, ratioH, ratioW, (endX-((endX-startX)-faceEndX)), startY, (endY-((endY-startY)-faceEndY)), color, local['thickness'], text[i], result[i])
 
-					del local['box']
-					del local['text']
-					del local['result']
-					del detections
-					del blob
-					del face
-					del (h, w)
+					#del local['box']
+					#del local['text']
+					#del local['result']
+					#del detections
+					#del blob
+					#del face
+					#del (h, w)
 
 
 					local['box'] = {}
@@ -455,28 +478,27 @@ async def read_frame(image):
 					local['text'] = text
 					local['result'] = result
 
-					if (local['frames'] % 5 == 0):
-						mem11 = proc.memory_info().rss
-						logger.debug("---------- Memory Collected 3: %0.2f%%" % local['mem'](mem11, mem10))
+					# mem11 = proc.memory_info().rss
+					# if (local['mem'](mem11, mem10) > 0):
+					# 	logger.debug("---------- Memory Allocated Process 6: %0.2f%%" % local['mem'](mem11, mem10))
 
-				del cropped
-			del orig
-			del rects
-			del pick
-			del weights
-			del rp
-			del dimp
+				#del cropped
+			#del orig
+			#del rects
+			#del pick
+			#del weights
+			#del rp
+			#del dimp
 
-			#del image
+			##del image
 
+		# else:
+		# 	if len(local['box']) > 0:
 
-		else:
-			if len(local['box']) > 0:
-
-				for i in range(0, len(local['box'])):
-					(startX, startY, endX, endY) = local['box'][i].astype("int")
-					(x1, y1, x2, y2) = local['box'][i].astype("int")
-					y = startY - 10 if startY - 10 > 10 else startY + 10
+		# 		for i in range(0, len(local['box'])):
+		# 			(startX, startY, endX, endY) = local['box'][i].astype("int")
+		# 			(x1, y1, x2, y2) = local['box'][i].astype("int")
+					# y = startY - 10 if startY - 10 > 10 else startY + 10
 
 					# if local['result'][i].startswith( 'unknown' ):
 					# 	color = local['color_unknow']
@@ -492,29 +514,24 @@ async def read_frame(image):
 		logger.error("error sending message line: {}".format(exc_tb.tb_lineno))
 		logger.error(message)
 
-	if (local['frames'] % 5 == 0):
-		mem4 = proc.memory_info().rss
-		logger.debug("---------- Memory Collected X: %0.2f%%" % local['mem'](mem4, mem5))
-		logger.debug("---------- Memory Overall X: %0.2f%%" % local['mem'](mem4, mem0))
-
 	return image
 	#return display
 
 async def process_video():
-
-	local['mem3'] = proc.memory_info().rss
-
 	local['frames'] = 0
 	local['unknown'] = 0
 	local['box'] = {}
 	local['text'] = {}
 	local['result'] = {}
+	local['memCheck'] = 0
 
 	try:
 		if local['feedURL'].startswith('rtsp'):
+			logger.debug("rtsp feed")
 			local['_camera'] = WebcamVideoStream(src=local['feedURL']).start()
 			#local['_camera'] = VideoStream(local['feedURL']).start()
 		else:
+			logger.debug("video feed")
 			local['_camera'] = cv2.VideoCapture(local['feedURL'])
 		await asyncio.sleep(2)
 	except Exception as ex:
@@ -524,19 +541,20 @@ async def process_video():
 		logger.error(message)
 
 	start_timer = time.time()
+	start_recording_timer = time.time()
 	while not local['shutdown']:
+		memX = proc.memory_info().rss
+
 		end_timer = time.time()
-		if (end_timer - start_timer) > local['timer']:
-			logger.debug("garbage collect:")
+		if (end_timer - start_timer) > fc['timer']:
+			#logger.debug("garbage collect")
 			#objgraph.show_most_common_types()
 			#logger.debug("growth:")
 			#objgraph.show_growth()
 
 			gc.collect()
-			memX = proc.memory_info().rss
-			logger.debug("---------- Memory Collected O: %0.2f%%" % local['mem'](memX, local['mem3']))
 			if len(local['capture']) == 0:
-				del local['capture']
+				#del local['capture']
 				local['capture'] = {}
 
 			if local['capture']:
@@ -545,11 +563,17 @@ async def process_video():
 				if error is not None:
 					if el.startswith( '0.unknown' ):
 						await local['face_recognition'].delete_unknown_names(el)
-				del el, error
+				#del el, error
+			tr.print_diff()
 
 			start_timer = time.time()
 
-		c_fps = FPS().start()
+		#c_fps = FPS().start()
+
+		memABC = proc.memory_info().rss
+		if (local['mem'](memABC, memX) > 0):
+			logger.debug("---------- Memory Allocated Process Video1: %0.2f%%" % local['mem'](memABC, memX))
+
 		if local['feedURL'].startswith('rtsp'):
 			image = local['_camera'].read()
 		else:
@@ -561,17 +585,47 @@ async def process_video():
 
 		image = await read_frame(image)
 
+
+		if (end_timer - start_recording_timer) >= local['recording_timer']:
+			local['recording'].append(image)
+			local['recording'].pop(0)
+		else:
+			local['recording'].append(image)
+
+		# if len(local['recording']) == 60:
+		# 	height, width, layers = image.shape
+		# 	size = (width,height)
+		# 	fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
+		# 	out = cv2.VideoWriter("/Users/admin/Downloads/dev/py/src/test.mp4",fourcc, 10.0, size,False)
+
+		# 	for i in range(len(local['recording'])):
+		# 		logger.debug("---------------------------------------------------------------save recording {}".format(i))
+
+		# 		# writing to a image array
+		# 		#out.write(cv2.cvtColor(local['recording'][i]), cv2.COLOR_RGB2BGR)
+		# 		out.write(local['recording'][i])
+		# 	out.release()
+
+
+		# logger.debug("recording length: {}".format(len(local['recording'])))
+
+		memXYZ = proc.memory_info().rss
+
 		encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), local['quality']]
 		rslt, image = cv2.imencode('.jpg', image, encode_param)
 		local['gimage'] = image
 		local['wsimage'] = image
 
-		del image
+		#del image
 
-		c_fps.update()
-		c_fps.stop()
+		#c_fps.update()
+		#c_fps.stop()
 		#print (c_fps.elapsed())
 		#print (c_fps.fps())
+
+		memXY = proc.memory_info().rss
+		if (local['mem'](memXY, memXYZ) > 0):
+			logger.debug("---------- Memory Allocated Process Video2: %0.2f%%" % local['mem'](memXY, memXYZ))
 
 		await asyncio.sleep(local['number_fps_second'])
 
@@ -594,6 +648,8 @@ async def baseHandle(request):
 
 async def localFeedHandle(request):
 	logger.info ('local feed handle')
+	memLO1 = proc.memory_info().rss
+
 	response = web.StreamResponse()
 	response.content_type = ('multipart/x-mixed-replace; '
 													 'boundary=--frameboundary')
@@ -607,8 +663,10 @@ async def localFeedHandle(request):
 				'Content-Length: {}\r\n\r\n'.format(
 						response.content_type, len(img_bytes)),
 				'utf-8') + img_bytes + b'\r\n')
+		#del img_bytes
 
 	while not local['shutdown']:
+		memL1 = proc.memory_info().rss
 		try:
 			await write(local['gimage'].tostring())
 		except Exception as ex:
@@ -618,20 +676,30 @@ async def localFeedHandle(request):
 			logger.error("error sending message line: {}".format(exc_tb.tb_lineno))
 			logger.error(message)
 			await asyncio.sleep(1)
+
+		memL2 = proc.memory_info().rss
+		if (local['mem'](memL2, memL1) > 0):
+			logger.debug("---------- Memory Allocated Feed : %0.2f%%" % local['mem'](memL2, memL1))
 		await asyncio.sleep(local['number_fps_second'])
+	memLO2 = proc.memory_info().rss
+	if (local['mem'](memLO2, memLO1) > 0):
+		logger.debug("---------- Memory Allocated Feed Outside: %0.2f%%" % local['mem'](memLO2, memLO1))
 
 async def heartbeat(timer):
+	memHO1 = proc.memory_info().rss
+
 	while local['control'] == None:
 		logger.debug('waiting...')
 		await asyncio.sleep(1)
 
 	while not local['shutdown']:
+		memH1 = proc.memory_info().rss
 		logger.info('heartbeat control center')
 		if local['control'] != None:
 			try:
 				await local['control'].send_str(json.dumps({"action":"hello","port":fc['port'],"ip":fc['ip'],"hostname":fc['hostname'],"date":time.strftime("%Y%m%d%H%M%S")}))
 			except Exception as ex:
-				del local['control']
+				#del local['control']
 				local['control'] = None
 
 				template = "an exception of type {0} occurred. arguments:\n{1!r}"
@@ -640,10 +708,18 @@ async def heartbeat(timer):
 				logger.error(message)
 		else:
 			logger.error('heartbeat lost to control center')
+
+		memH2 = proc.memory_info().rss
+		if (local['mem'](memH2, memH1) > 0):
+			logger.debug("---------- Memory Allocated Heartbeat : %0.2f%%" % local['mem'](memH2, memH1))
 		await asyncio.sleep(timer)
+	memHO2 = proc.memory_info().rss
+	if (local['mem'](memHO2, memHO1) > 0):
+		logger.debug("---------- Memory Allocated Heartbeat Outside : %0.2f%%" % local['mem'](memHO2, memHO1))
 
 async def control(timer):
 	while not local['shutdown']:
+		memCO1 = proc.memory_info().rss
 		logger.info('connecting to control center')
 		try:
 			link = f'ws://control:1880/node-red/control'
@@ -651,10 +727,12 @@ async def control(timer):
 				link = f'wss://exception34.com/node-red/control'
 			async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
 				async with session.ws_connect(link, heartbeat=2, receive_timeout=5) as ws:
-					del local['control']
+					#del local['control']
 					local['control'] = ws
 					logger.info ('control connected')
 					async for msg in ws:
+						memC1 = proc.memory_info().rss
+
 						payload = json.loads(msg.data)
 						logger.info ("message: {}".format(payload['action']))
 
@@ -735,12 +813,18 @@ async def control(timer):
 								break
 							elif msg.type == aiohttp.WSMsgType.ERROR:
 								break
+						memC2 = proc.memory_info().rss
+						if (local['mem'](memC2, memC1) > 0):
+							logger.debug("---------- Memory Allocated Control : %0.2f%%" % local['mem'](memC2, memC1))
 		except Exception as ex:
 			template = "an exception of type {0} occurred. arguments:\n{1!r}"
 			message = template.format(type(ex).__name__, ex.args)
 			logger.error("error connecting to control center:")
 			logger.error(message)
 			await asyncio.sleep(timer)
+		memCO2 = proc.memory_info().rss
+		if (local['mem'](memCO2, memCO1) > 0):
+			logger.debug("---------- Memory Allocated Control Outside: %0.2f%%" % local['mem'](memCO2, memCO1))
 
 async def feedsocket(timer):
 	while not local['shutdown']:
@@ -793,11 +877,10 @@ async def build_server(loop, address, port):
 			return await loop.create_server(app.make_handler(), address, port, ssl=sslcontext)
 
 if __name__ == '__main__':
-		mem1 = proc.memory_info().rss
 		init()
 		loop = asyncio.get_event_loop()
-		mem2 = proc.memory_info().rss
-		logger.debug("---------- Allocation Initial: %0.2f%%" % local['mem'](mem2, mem0))
+		mem1 = proc.memory_info().rss
+		logger.debug("---------- Allocation Initial: %0.2f%%" % local['mem'](mem1, mem0))
 
 		try:
 			asyncio.ensure_future(control(10))
